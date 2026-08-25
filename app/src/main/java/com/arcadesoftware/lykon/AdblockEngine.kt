@@ -50,7 +50,7 @@ object AdblockEngine {
 
     // ── Filter file names (used in both assets and internal storage) ─────
 
-    private val FILTER_FILES = listOf("easylist.txt", "easyprivacy.txt", "ublock-filters.txt", "ott-filters.txt")
+    private val FILTER_FILES = listOf("easylist.txt", "easyprivacy.txt", "ublock-filters.txt", "ott-filters.txt", "malware.txt")
     private val EXTRA_FILTER_FILES = listOf("peter-lowe.txt", "oisd-basic.txt")
     const val FILTERS_DIR = "filters"
 
@@ -417,6 +417,11 @@ object AdblockEngine {
                         if (domain.isNotEmpty() && domain.contains(".") && !domain.startsWith("#")) {
                             blocked.add(domain.lowercase())
                         }
+                    }
+                } else if (!line.startsWith("||") && !line.startsWith("/") && !line.startsWith("&") && !line.startsWith("-") && !line.startsWith(".") && !line.contains("/") && !line.contains("=") && !line.contains("*") && !line.contains("?") && !line.contains(":")) {
+                    val candidate = line.split(Regex("[\\s|#]"))[0].trim().lowercase()
+                    if (candidate.isNotEmpty() && candidate.contains(".") && !candidate.startsWith("#")) {
+                        blocked.add(candidate)
                     }
                 }
             }

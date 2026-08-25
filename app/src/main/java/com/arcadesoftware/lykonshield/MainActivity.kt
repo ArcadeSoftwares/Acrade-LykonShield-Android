@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
@@ -183,7 +184,7 @@ class MainActivity : ComponentActivity() {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route ?: "home"
 
-                val tabs = remember { listOf("home", "blocked", "settings") }
+                val tabs = remember { listOf("home", "blocked", "content_blocking", "settings") }
                 var selectedTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
                 LaunchedEffect(currentRoute) {
@@ -195,7 +196,7 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(selectedTabIndex) {
                     val route = tabs[selectedTabIndex]
-                    if (route != currentRoute && route in listOf("home", "blocked", "settings")) {
+                    if (route != currentRoute && route in listOf("home", "blocked", "content_blocking", "settings")) {
                         navController.navigate(route) {
                             popUpTo(navController.graph.startDestinationId) {
                                 saveState = true
@@ -306,10 +307,12 @@ class MainActivity : ComponentActivity() {
 
                 val homeState = rememberLazyListState()
                 val blockedState = rememberLazyListState()
+                val contentBlockingState = rememberLazyListState()
                 val settingsState = rememberLazyListState()
 
                 val homeScrollOffset = rememberLazyListScrollOffset(homeState)
                 val blockedScrollOffset = rememberLazyListScrollOffset(blockedState)
+                val contentBlockingScrollOffset = rememberLazyListScrollOffset(contentBlockingState)
                 val settingsScrollOffset = rememberLazyListScrollOffset(settingsState)
 
                 val scrollOffsetProvider = remember(currentRoute) {
@@ -317,6 +320,7 @@ class MainActivity : ComponentActivity() {
                         when (currentRoute) {
                             "home" -> homeScrollOffset
                             "blocked" -> blockedScrollOffset
+                            "content_blocking" -> contentBlockingScrollOffset
                             "settings" -> settingsScrollOffset
                             else -> 0f
                         }
@@ -326,7 +330,7 @@ class MainActivity : ComponentActivity() {
                 val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                 val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-                val showBars = currentRoute in listOf("home", "blocked", "settings")
+                val showBars = currentRoute in listOf("home", "blocked", "content_blocking", "settings")
                 val dialogBackdrop = rememberLayerBackdrop()
 
                 Box(
@@ -368,6 +372,15 @@ class MainActivity : ComponentActivity() {
                                     state = blockedState,
                                     isProtectionEnabled = isProtectionEnabled,
                                     isAdvancedNetworkStatsEnabled = isAdvancedNetworkStatsEnabled,
+                                    topPadding = 12.dp + statusBarPadding,
+                                    bottomPadding = 88.dp + navBarPadding,
+                                    backdrop = backgroundBackdrop
+                                )
+                            }
+                            composable("content_blocking") {
+                                ContentBlockingScreen(
+                                    state = contentBlockingState,
+                                    isProtectionEnabled = isProtectionEnabled,
                                     topPadding = 12.dp + statusBarPadding,
                                     bottomPadding = 88.dp + navBarPadding,
                                     backdrop = backgroundBackdrop
@@ -439,6 +452,7 @@ class MainActivity : ComponentActivity() {
                         val topBarTitle = when (currentRoute) {
                             "home" -> "Shield"
                             "blocked" -> "Blocked"
+                            "content_blocking" -> "Content Blocking"
                             "settings" -> "Settings"
                             else -> "Shield"
                         }
@@ -452,15 +466,16 @@ class MainActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
-                                .width(280.dp)
+                                .width(312.dp)
                                 .navigationBarsPadding()
-                                .padding(bottom = 24.dp)
+                                .padding(bottom = 16.dp)
                         ) {
                             LiquidBottomTabs(
                                 selectedTabIndex = { selectedTabIndex },
                                 onTabSelected = { selectedTabIndex = it },
                                 backdrop = backdrop,
-                                tabsCount = 3,
+                                tabsCount = 4,
+                                height = 48.dp,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 LiquidBottomTab(onClick = { selectedTabIndex = 0 }) {
@@ -469,12 +484,13 @@ class MainActivity : ComponentActivity() {
                                     Icon(
                                         imageVector = if (isSelected) SFHouseFilledIcon else SFHouseIcon,
                                         contentDescription = "Home",
-                                        tint = iconColor
+                                        tint = iconColor,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                     Text(
                                         text = "Home",
                                         color = iconColor,
-                                        fontSize = 11.sp
+                                        fontSize = 10.sp
                                     )
                                 }
                                 LiquidBottomTab(onClick = { selectedTabIndex = 1 }) {
@@ -483,26 +499,43 @@ class MainActivity : ComponentActivity() {
                                     Icon(
                                         imageVector = if (isSelected) ShieldFilledIcon else ShieldIcon,
                                         contentDescription = "Blocked",
-                                        tint = iconColor
+                                        tint = iconColor,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                     Text(
                                         text = "Blocked",
                                         color = iconColor,
-                                        fontSize = 11.sp
+                                        fontSize = 10.sp
                                     )
                                 }
                                 LiquidBottomTab(onClick = { selectedTabIndex = 2 }) {
                                     val isSelected = selectedTabIndex == 2
                                     val iconColor = if (isSelected) (if (isLightTheme) Color(0xFF007AFF) else Color(0xFF0A84FF)) else Color(0xFF8E8E93)
                                     Icon(
+                                        imageVector = if (isSelected) ContentBlockingFilledIcon else ContentBlockingIcon,
+                                        contentDescription = "Content Blocking",
+                                        tint = iconColor,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Text(
+                                        text = "Blocking",
+                                        color = iconColor,
+                                        fontSize = 10.sp
+                                    )
+                                }
+                                LiquidBottomTab(onClick = { selectedTabIndex = 3 }) {
+                                    val isSelected = selectedTabIndex == 3
+                                    val iconColor = if (isSelected) (if (isLightTheme) Color(0xFF007AFF) else Color(0xFF0A84FF)) else Color(0xFF8E8E93)
+                                    Icon(
                                         imageVector = if (isSelected) SFGearshapeFilledIcon else SFGearshapeIcon,
                                         contentDescription = "Settings",
-                                        tint = iconColor
+                                        tint = iconColor,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                     Text(
                                         text = "Settings",
                                         color = iconColor,
-                                        fontSize = 11.sp
+                                        fontSize = 10.sp
                                     )
                                 }
                             }

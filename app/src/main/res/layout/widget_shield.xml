@@ -37,9 +37,10 @@
                 android:fontFamily="sans-serif-medium" />
 
             <TextView
+                android:id="@+id/widget_total_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Total"
+                android:text="Today"
                 android:textColor="#8E8E93"
                 android:textSize="8sp"
                 android:fontFamily="sans-serif"

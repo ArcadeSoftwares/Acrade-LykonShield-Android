@@ -35,6 +35,20 @@ class ShieldWidgetProvider : AppWidgetProvider() {
 
         val views = RemoteViews(context.packageName, R.layout.widget_shield)
 
+        // Extract today's blocks
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+        val todayKey = sdf.format(java.util.Date())
+        val dailyString = statsPrefs.getString("daily_blocks", "") ?: ""
+        var todayBlocks = 0
+        if (dailyString.isNotEmpty()) {
+            dailyString.split(",").forEach { entry ->
+                val parts = entry.split(":")
+                if (parts.size == 2 && parts[0] == todayKey) {
+                    todayBlocks = parts[1].toIntOrNull() ?: 0
+                }
+            }
+        }
+
         val categoryString = statsPrefs.getString("category_blocks", "") ?: ""
         val categoryCounts = mutableMapOf<String, Int>()
         var totalBlocks = 0
@@ -53,8 +67,11 @@ class ShieldWidgetProvider : AppWidgetProvider() {
 
         val sortedCategories = categoryCounts.entries.sortedByDescending { it.value }
 
-        // Set Total Count Text
-        views.setTextViewText(R.id.widget_total_count, totalBlocks.toString())
+        // Set Today's Daily Count Text (or fall back to total if daily not yet bucketed)
+        val displayCount = if (todayBlocks > 0) todayBlocks else totalBlocks
+        val displayLabel = if (todayBlocks > 0) "Today" else "Total"
+        views.setTextViewText(R.id.widget_total_count, displayCount.toString())
+        views.setTextViewText(R.id.widget_total_label, displayLabel)
 
         // Draw Pie Chart
         val bitmap = createCategoriesPieChartBitmap(sortedCategories, totalBlocks)

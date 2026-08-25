@@ -31,6 +31,30 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ContentBlockingActivity"
+            android:exported="false"
+            android:label="Content Blocking" />
+
+        <activity
+            android:name=".YouTubeShortsRedirectActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:noHistory="true"
+            android:excludeFromRecents="true">
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="youtube.com" android:pathPrefix="/shorts/" />
+                <data android:host="www.youtube.com" android:pathPrefix="/shorts/" />
+                <data android:host="m.youtube.com" android:pathPrefix="/shorts/" />
+                <data android:host="youtu.be" android:pathPrefix="/shorts/" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".LykonVpnService"
             android:permission="android.permission.BIND_VPN_SERVICE"
@@ -39,6 +63,19 @@
             <intent-filter>
                 <action android:name="android.net.VpnService" />
             </intent-filter>
+        </service>
+
+        <service
+            android:name=".LykonAccessibilityService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:label="Lykon Shield Shorts Blocker"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config" />
         </service>
 
         <service
@@ -62,6 +99,14 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/shield_widget_info" />
+        </receiver>
+
+        <receiver
+            android:name=".BlockActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.arcadesoftware.lykonshield.UNBLOCK_DOMAIN" />
+            </intent-filter>
         </receiver>
 
     </application>

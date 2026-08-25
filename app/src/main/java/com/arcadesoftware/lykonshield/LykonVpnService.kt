@@ -2,6 +2,7 @@ package com.arcadesoftware.lykonshield
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
@@ -73,6 +74,28 @@ class LykonVpnService : VpnService() {
             "2620:fe::fe", "2620:fe::9",                       // Quad9
             "2620:119:35::35", "2620:119:53::53",             // OpenDNS
             "2a10:50c0::ad1:ff", "2a10:50c0::ad2:ff"          // AdGuard
+        )
+
+        // Content blocking domain patterns
+        private val YT_SHORTS_DOMAINS = setOf(
+            "shorts.youtube.com", "m.youtube.com/shorts", "yt3.ggpht.com"
+        )
+        private val INSTAGRAM_DOMAINS = setOf(
+            "instagram.com", "cdninstagram.com", "ig.me", "threads.net"
+        )
+        private val TIKTOK_DOMAINS = setOf(
+            "tiktok.com", "tiktokcdn.com", "tiktokv.com", "byteoversea.com", "ibytedtos.com", "musical.ly"
+        )
+        private val FACEBOOK_DOMAINS = setOf(
+            "facebook.com", "fbcdn.net", "fbsbx.com", "meta.com"
+        )
+        private val SNAPCHAT_DOMAINS = setOf(
+            "snapchat.com", "sc-cdn.net", "snap-dev.net"
+        )
+        private val ADULT_DOMAINS = setOf(
+            "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com", "redtube.com",
+            "youporn.com", "chaturbate.com", "onlyfans.com", "stripchat.com", "livejasmin.com",
+            "brazzers.com", "eporner.com", "spankbang.com", "hqporner.com", "daftsex.com"
         )
         
         @Volatile
@@ -367,19 +390,46 @@ class LykonVpnService : VpnService() {
             return
         }
 
+        val customAllowedDomains = prefs.getStringSet("custom_allowed_domains", emptySet()) ?: emptySet()
+        val lowerDomain = domain.lowercase()
+
+        // If user explicitly unblocked/whitelisted this domain, always forward
+        if (customAllowedDomains.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+            forwardDnsQuery(requestPacket, ipHeaderLen, udpHeaderLen, outputStream)
+            ShieldStatsManager.recordTraffic(applicationContext, domain, packageName, isBlocked = false)
+            return
+        }
+
         val protectionLevel = prefs.getString("protection_level", "TRACKER_AND_ADS") ?: "TRACKER_AND_ADS"
+        val isShieldOn = isVpnActive && protectionLevel != "DISABLED"
 
-        var shouldBlock = AdblockEngine.shouldBlockDomain(domain, packageName)
+        // ─── Content Blocking Filters (Social / Safety / Custom Websites) ───
+        val blockInstagram = prefs.getBoolean("block_instagram", false)
+        val blockAdultContent = prefs.getBoolean("block_adult_content", false)
+        val customBlockedWebsites = prefs.getStringSet("custom_blocked_websites", emptySet()) ?: emptySet()
 
-        if (shouldBlock && !AdblockEngine.isDoHProvider(domain)) {
-            val category = AdblockEngine.categorize(domain)
-            if (protectionLevel == "TRACKER_ONLY" && category == AdblockEngine.BlockCategory.AD) {
-                shouldBlock = false
-                Log.d(TAG, "Allowed domain $domain despite blocklist because protection level is TRACKER_ONLY")
+        var isContentBlocked = false
+        if (blockInstagram && INSTAGRAM_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+            isContentBlocked = true
+        } else if (blockAdultContent && ADULT_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+            isContentBlocked = true
+        } else if (customBlockedWebsites.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+            isContentBlocked = true
+        }
+
+        var shouldBlock = isContentBlocked
+        if (!shouldBlock && isShieldOn) {
+            shouldBlock = AdblockEngine.shouldBlockDomain(domain, packageName)
+            if (shouldBlock && !AdblockEngine.isDoHProvider(domain)) {
+                val category = AdblockEngine.categorize(domain)
+                if (protectionLevel == "TRACKER_ONLY" && category == AdblockEngine.BlockCategory.AD) {
+                    shouldBlock = false
+                    Log.d(TAG, "Allowed domain $domain despite blocklist because protection level is TRACKER_ONLY")
+                }
             }
         }
 
-        Log.d(TAG, "DNS Query from $packageName: $domain -> shouldBlock = $shouldBlock (level=$protectionLevel)")
+        Log.d(TAG, "DNS Query from $packageName: $domain -> shouldBlock = $shouldBlock (level=$protectionLevel, contentBlocked=$isContentBlocked)")
 
         if (shouldBlock) {
             val response = when (queryType) {
@@ -394,6 +444,9 @@ class LykonVpnService : VpnService() {
             writeToTun(outputStream, response)
             ShieldStatsManager.recordBlockWithApp(applicationContext, domain, packageName)
             checkAndNotifyAppBlockRate(packageName, true, protectionLevel)
+            if (isContentBlocked) {
+                notifyBlockedDomain(domain, packageName)
+            }
         } else {
             forwardDnsQuery(requestPacket, ipHeaderLen, udpHeaderLen, outputStream)
             ShieldStatsManager.recordTraffic(applicationContext, domain, packageName, isBlocked = false)
@@ -455,6 +508,60 @@ class LykonVpnService : VpnService() {
 
         nm.notify(packageName.hashCode(), notification)
     }
+
+    private fun notifyBlockedDomain(domain: String, packageName: String) {
+        val now = System.currentTimeMillis()
+        val key = "block_notif_$domain"
+        val lastTime = domainNotificationTimes[key] ?: 0L
+        if (now - lastTime < 30_000) return // Debounce same domain notification to 30s
+        domainNotificationTimes[key] = now
+
+        val channelId = "lykon_content_blocking"
+        val nm = getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId, "Content & Domain Blocking", NotificationManager.IMPORTANCE_DEFAULT
+            )
+            nm.createNotificationChannel(channel)
+        }
+
+        // Action: Unblock / Remove from Shield
+        val unblockIntent = Intent(this, BlockActionReceiver::class.java).apply {
+            action = "com.arcadesoftware.lykonshield.UNBLOCK_DOMAIN"
+            putExtra("domain", domain)
+        }
+        val unblockPendingIntent = PendingIntent.getBroadcast(
+            this,
+            domain.hashCode(),
+            unblockIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Action: Open Content Blocking settings
+        val settingsIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("navigate_to", "content_blocking")
+        }
+        val settingsPendingIntent = PendingIntent.getActivity(
+            this,
+            domain.hashCode() + 1,
+            settingsIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, channelId)
+            .setContentTitle("Domain Blocked: $domain")
+            .setContentText("Blocked by Content Filtering. If this is a mistake, unblock it below.")
+            .setSmallIcon(R.drawable.dark_icon)
+            .setContentIntent(settingsPendingIntent)
+            .addAction(R.drawable.dark_icon, "Unblock Domain", unblockPendingIntent)
+            .setAutoCancel(true)
+            .build()
+
+        nm.notify(domain.hashCode(), notification)
+    }
+
+    private val domainNotificationTimes = java.util.concurrent.ConcurrentHashMap<String, Long>()
 
     private fun forwardDnsQuery(
         requestPacket: ByteArray, ipHeaderLen: Int,

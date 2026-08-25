@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Lykon Shield</string>
     <string name="version">1.0.6</string>
+    <string name="accessibility_service_description">Automatically detects and closes YouTube Shorts / Reels in apps while keeping standard video playback completely functional.</string>
 
     <string-array name="faq_questions">
         <item>What is Lykon Shield?</item>
