@@ -74,27 +74,36 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(R.id.widget_total_label, displayLabel)
 
         // Draw Pie Chart
-        val top5Categories = sortedCategories.take(5)
-        val bitmap = createCategoriesPieChartBitmap(context, top5Categories, totalBlocks)
+        val displayCategories = mutableListOf<Map.Entry<String, Int>>()
+        if (sortedCategories.size <= 6) {
+            displayCategories.addAll(sortedCategories)
+        } else {
+            displayCategories.addAll(sortedCategories.take(5))
+            val extraCount = sortedCategories.drop(5).sumOf { it.value }
+            if (extraCount > 0) {
+                displayCategories.add(java.util.AbstractMap.SimpleEntry("Extra", extraCount))
+            }
+        }
+        val bitmap = createCategoriesPieChartBitmap(context, displayCategories, totalBlocks)
         views.setImageViewBitmap(R.id.widget_pie_chart, bitmap)
 
         // Setup Legend Rows
-        val rowLayouts = listOf(R.id.row_0, R.id.row_1, R.id.row_2, R.id.row_3, R.id.row_4)
-        val rowDots = listOf(R.id.row_0_dot, R.id.row_1_dot, R.id.row_2_dot, R.id.row_3_dot, R.id.row_4_dot)
-        val rowNames = listOf(R.id.row_0_name, R.id.row_1_name, R.id.row_2_name, R.id.row_3_name, R.id.row_4_name)
-        val rowPercents = listOf(R.id.row_0_percent, R.id.row_1_percent, R.id.row_2_percent, R.id.row_3_percent, R.id.row_4_percent)
-        val rowCounts = listOf(R.id.row_0_count, R.id.row_1_count, R.id.row_2_count, R.id.row_3_count, R.id.row_4_count)
+        val rowLayouts = listOf(R.id.row_0, R.id.row_1, R.id.row_2, R.id.row_3, R.id.row_4, R.id.row_5)
+        val rowDots = listOf(R.id.row_0_dot, R.id.row_1_dot, R.id.row_2_dot, R.id.row_3_dot, R.id.row_4_dot, R.id.row_5_dot)
+        val rowNames = listOf(R.id.row_0_name, R.id.row_1_name, R.id.row_2_name, R.id.row_3_name, R.id.row_4_name, R.id.row_5_name)
+        val rowPercents = listOf(R.id.row_0_percent, R.id.row_1_percent, R.id.row_2_percent, R.id.row_3_percent, R.id.row_4_percent, R.id.row_5_percent)
+        val rowCounts = listOf(R.id.row_0_count, R.id.row_1_count, R.id.row_2_count, R.id.row_3_count, R.id.row_4_count, R.id.row_5_count)
         
-        if (sortedCategories.isEmpty()) {
+        if (displayCategories.isEmpty()) {
             for (id in rowLayouts) {
                 views.setViewVisibility(id, android.view.View.GONE)
             }
             views.setViewVisibility(R.id.widget_empty_text, android.view.View.VISIBLE)
         } else {
             views.setViewVisibility(R.id.widget_empty_text, android.view.View.GONE)
-            for (i in 0 until 5) {
-                if (i < sortedCategories.size) {
-                    val cat = sortedCategories[i]
+            for (i in 0 until 6) {
+                if (i < displayCategories.size) {
+                    val cat = displayCategories[i]
                     val catName = cat.key.lowercase().replaceFirstChar { it.uppercase() }
                     val percent = if (totalBlocks > 0) ((cat.value.toFloat() / totalBlocks) * 100).toInt() else 0
                     val color = getColorForCategory(cat.key)
