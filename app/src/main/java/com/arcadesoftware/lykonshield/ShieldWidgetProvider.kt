@@ -75,6 +75,14 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val displayLabel = if (todayBlocks > 0) "Today" else "Total"
         views.setTextViewText(R.id.widget_total_count, displayCount.toString())
         views.setTextViewText(R.id.widget_total_label, displayLabel)
+        
+        if (!isProtectionEnabled) {
+            views.setTextColor(R.id.widget_total_count, android.graphics.Color.parseColor("#8E8E93"))
+            views.setTextColor(R.id.widget_total_label, android.graphics.Color.parseColor("#8E8E93"))
+        } else {
+            views.setTextColor(R.id.widget_total_count, androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary))
+            views.setTextColor(R.id.widget_total_label, androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_secondary))
+        }
 
         // Draw Pie Chart
         // The default 5 categories to ALWAYS show
