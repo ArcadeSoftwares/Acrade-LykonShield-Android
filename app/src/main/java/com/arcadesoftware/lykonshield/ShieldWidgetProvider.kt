@@ -74,7 +74,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(R.id.widget_total_label, displayLabel)
 
         // Draw Pie Chart
-        val bitmap = createCategoriesPieChartBitmap(sortedCategories, totalBlocks)
+        val bitmap = createCategoriesPieChartBitmap(context, sortedCategories, totalBlocks)
         views.setImageViewBitmap(R.id.widget_pie_chart, bitmap)
 
         // Setup Legend Rows
@@ -151,7 +151,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         return bitmap
     }
 
-    private fun createCategoriesPieChartBitmap(categories: List<Map.Entry<String, Int>>, total: Int): Bitmap {
+    private fun createCategoriesPieChartBitmap(context: Context, categories: List<Map.Entry<String, Int>>, total: Int): Bitmap {
         val size = 260
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -164,16 +164,23 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val rect = RectF(20f, 20f, size - 20f, size - 20f)
         
         if (total == 0 || categories.isEmpty()) {
-            paint.color = Color.parseColor("#38383A")
+            paint.color = androidx.core.content.ContextCompat.getColor(context, R.color.widget_track_empty)
             canvas.drawArc(rect, 0f, 360f, false, paint)
             return bitmap
         }
         
         var startAngle = -90f
+        val gap = if (categories.size > 1) 3f else 0f
+
         for (cat in categories) {
             val sweep = (cat.value.toFloat() / total) * 360f
             paint.color = getColorForCategory(cat.key)
-            canvas.drawArc(rect, startAngle, sweep, false, paint)
+            
+            if (sweep > gap) {
+                canvas.drawArc(rect, startAngle + gap / 2f, sweep - gap, false, paint)
+            } else if (sweep > 0) {
+                canvas.drawArc(rect, startAngle, sweep, false, paint)
+            }
             startAngle += sweep
         }
         
