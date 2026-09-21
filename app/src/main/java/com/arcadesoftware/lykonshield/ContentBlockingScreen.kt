@@ -140,6 +140,8 @@ fun ContentBlockingScreen(
                             text = "Content Blocking",
                             fontSize = 34.sp,
                             fontWeight = FontWeight.Bold,
+                letterSpacing = (-1).sp,
+                lineHeight = 36.sp,
                             color = contentColor,
                             letterSpacing = (-0.5).sp
                         )

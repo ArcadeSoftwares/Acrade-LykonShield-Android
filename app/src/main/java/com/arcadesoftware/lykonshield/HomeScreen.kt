@@ -308,6 +308,8 @@ fun HomeScreen(
                 text = "Home",
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = (-1).sp,
+                lineHeight = 36.sp,
                 color = contentColor,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
@@ -351,7 +353,8 @@ fun HomeScreen(
                     text = "PROTECTION STATISTICS",
                     color = Color.Gray,
                     fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
+                    letterSpacing = 0.5.sp,
                     modifier = Modifier.padding(start = 8.dp)
                 )
                 GlassCard(
@@ -973,7 +976,7 @@ fun InAppTrackerProtectionCard(
                         }
 
                         Box(
-                            modifier = Modifier.height(32.dp).clip(RoundedCornerShape(16.dp))
+                            modifier = Modifier.height(32.dp).clip(RoundedCornerShape(22.dp))
                                 .background(if (isLightTheme) Color.Black.copy(0.05f) else Color.White.copy(0.1f))
                                 .padding(horizontal = 10.dp),
                             contentAlignment = Alignment.Center

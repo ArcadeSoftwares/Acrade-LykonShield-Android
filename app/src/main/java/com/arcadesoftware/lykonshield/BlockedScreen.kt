@@ -150,6 +150,8 @@ fun BlockedScreen(
                 text = "Blocked",
                 fontSize = 34.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = (-1).sp,
+                lineHeight = 36.sp,
                 color = contentColor,
                 modifier = Modifier.padding(vertical = 12.dp)
             )
@@ -205,7 +207,8 @@ fun BlockedScreen(
                         text = "PROTECTION STATISTICS",
                         color = Color.Gray,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
+                        letterSpacing = 0.5.sp,
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     GlassCard(
@@ -517,7 +520,7 @@ fun BlockedScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 8.dp)
-                            .clip(RoundedCornerShape(16.dp))
+                            .clip(RoundedCornerShape(22.dp))
                             .background(if (isLightTheme) Color.Black.copy(0.05f) else Color.White.copy(0.1f))
                             .padding(12.dp),
                         textStyle = androidx.compose.ui.text.TextStyle(
@@ -1455,7 +1458,8 @@ fun AppDetailPopupContent(
                 text = "BLOCK BREAKDOWN",
                 color = Color.Gray,
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.5.sp
             )
 
             Row(
@@ -1588,7 +1592,8 @@ fun AppDetailPopupContent(
                 text = "TOP BLOCKED DOMAINS",
                 color = Color.Gray,
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.5.sp
             )
 
             if (finalTopDomains.isEmpty()) {
