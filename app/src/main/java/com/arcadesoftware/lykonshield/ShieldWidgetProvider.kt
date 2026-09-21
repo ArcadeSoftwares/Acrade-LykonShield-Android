@@ -320,10 +320,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                         0
                     }
 
-                val categoryColor =
-                    getColorForCategory(
-                        category.key
-                    )
+                val categoryColor = listOf(Color.parseColor("#FF5F56"), Color.parseColor("#FFBD2E"), Color.parseColor("#27C93F")).getOrElse(i) { getColorForCategory(category.key) }
 
                 views.setViewVisibility(
                     rowLayouts[i],
@@ -541,7 +538,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 (sizePx / 2f) + currentRadius
             )
             
-            val color = getColorForCategory(category.key)
+            val color = listOf(Color.parseColor("#FF5F56"), Color.parseColor("#FFBD2E"), Color.parseColor("#27C93F")).getOrElse(i) { getColorForCategory(category.key) }
             
             // Draw background track (lightened)
             paint.color = Color.argb(64, Color.red(color), Color.green(color), Color.blue(color))
