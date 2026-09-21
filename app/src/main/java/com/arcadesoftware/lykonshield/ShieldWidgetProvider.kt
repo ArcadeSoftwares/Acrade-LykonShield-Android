@@ -197,22 +197,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 totalBlocks
             }
 
-        val displayLabel =
-            if (todayBlocks > 0) {
-                "Today"
-            } else {
-                "Total"
-            }
 
-        views.setTextViewText(
-            R.id.widget_total_count,
-            formatNumber(displayCount)
-        )
-
-        views.setTextViewText(
-            R.id.widget_total_label,
-            displayLabel
-        )
 
         // =========================================================
         // 4x1 WIDGET
@@ -225,10 +210,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             View.VISIBLE
         )
 
-        views.setViewVisibility(
-            R.id.widget_legend_container,
-            View.VISIBLE
-        )
+        // Legend container removed in new layout
 
         views.setViewVisibility(
             R.id.widget_empty_text,
@@ -239,7 +221,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             context,
             sortedCategories,
             totalBlocks,
-            54
+            96
         )
 
         views.setImageViewBitmap(
@@ -273,13 +255,6 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 R.id.row_0_name,
                 R.id.row_1_name,
                 R.id.row_2_name,
-            )
-
-        val rowPercents =
-            listOf(
-                R.id.row_0_percent,
-                R.id.row_1_percent,
-                R.id.row_2_percent,
             )
 
         val rowCounts =
@@ -362,18 +337,13 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 )
 
                 views.setTextViewText(
-                    rowNames[i],
-                    categoryName
-                )
-
-                views.setTextViewText(
-                    rowPercents[i],
-                    "$percent%"
-                )
-
-                views.setTextViewText(
                     rowCounts[i],
-                    "(${formatNumber(category.value)})"
+                    formatNumber(category.value)
+                )
+
+                views.setTextViewText(
+                    rowNames[i],
+                    "/ $categoryName"
                 )
             }
         }
@@ -538,113 +508,51 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         total: Int,
         sizeDp: Int
     ): Bitmap {
+        val density = context.resources.displayMetrics.density
+        val sizePx = (sizeDp * density).toInt().coerceAtLeast(1)
+        val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
 
-        val density =
-            context.resources
-                .displayMetrics
-                .density
+        val strokeWidth = sizePx * 0.12f
+        val gap = strokeWidth * 0.4f
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            this.strokeWidth = strokeWidth
+            strokeCap = Paint.Cap.ROUND
+        }
 
-        val sizePx =
-            (sizeDp * density)
-                .toInt()
-                .coerceAtLeast(1)
-
-        val bitmap =
-            Bitmap.createBitmap(
-                sizePx,
-                sizePx,
-                Bitmap.Config.ARGB_8888
-            )
-
-        val canvas =
-            Canvas(bitmap)
-
-        val strokeWidth =
-            sizePx * 0.18f
-
-        val paint =
-            Paint(
-                Paint.ANTI_ALIAS_FLAG
-            ).apply {
-
-                style =
-                    Paint.Style.STROKE
-
-                this.strokeWidth =
-                    strokeWidth
-
-                strokeCap =
-                    Paint.Cap.BUTT
-            }
-
-        val inset =
-            strokeWidth / 2f + 2f
-
-        val rect =
-            RectF(
-                inset,
-                inset,
-                sizePx - inset,
-                sizePx - inset
-            )
-
-        // =========================================================
-        // EMPTY STATE
-        // =========================================================
-
-        if (
-            total <= 0 ||
-            categories.isEmpty()
-        ) {
-
-            paint.color =
-                Color.parseColor(
-                    "#38383A"
-                )
-
-            canvas.drawArc(
-                rect,
-                0f,
-                360f,
-                false,
-                paint
-            )
-
+        if (total <= 0 || categories.isEmpty()) {
+            paint.color = Color.parseColor("#E0E0E0")
+            val inset = strokeWidth / 2f
+            canvas.drawArc(RectF(inset, inset, sizePx - inset, sizePx - inset), 0f, 360f, false, paint)
             return bitmap
         }
 
-        // =========================================================
-        // DRAW PIE
-        // =========================================================
+        val maxVal = categories[0].value.toFloat()
+        var currentRadius = (sizePx / 2f) - (strokeWidth / 2f)
 
-        var startAngle = -90f
-
-        for (category in categories) {
-
-            val sweep =
-                (
-                        category.value
-                            .toFloat()
-                            .div(total)
-                            .times(360f)
-                        )
-
-            paint.color =
-                getColorForCategory(
-                    category.key
-                )
-
-            canvas.drawArc(
-                rect,
-                startAngle,
-                sweep,
-                false,
-                paint
+        for (i in 0 until minOf(3, categories.size)) {
+            val category = categories[i]
+            val rect = RectF(
+                (sizePx / 2f) - currentRadius,
+                (sizePx / 2f) - currentRadius,
+                (sizePx / 2f) + currentRadius,
+                (sizePx / 2f) + currentRadius
             )
-
-            startAngle += sweep
+            
+            val color = getColorForCategory(category.key)
+            
+            // Draw background track (lightened)
+            paint.color = Color.argb(40, Color.red(color), Color.green(color), Color.blue(color))
+            canvas.drawArc(rect, 0f, 360f, false, paint)
+            
+            // Draw foreground progress
+            val sweep = (category.value / maxVal) * 280f + 20f // Give it some minimum visual weight
+            paint.color = color
+            canvas.drawArc(rect, -90f, sweep.coerceAtMost(360f), false, paint)
+            
+            currentRadius -= (strokeWidth + gap)
         }
 
         return bitmap
-    }
-}
+    }}

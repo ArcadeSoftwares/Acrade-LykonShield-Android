@@ -142,8 +142,7 @@ fun ContentBlockingScreen(
                             fontWeight = FontWeight.Bold,
                 letterSpacing = (-1).sp,
                 lineHeight = 36.sp,
-                            color = contentColor,
-                            letterSpacing = (-0.5).sp
+                            color = contentColor
                         )
                         Text(
                             text = "Control distractions, adult websites, and custom domain filters",
