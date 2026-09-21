@@ -36,6 +36,7 @@ class LykonVpnService : VpnService() {
 
     companion object {
         private const val TAG = "LykonVpnService"
+        private var lastContentBlockNotificationTime = 0L
         const val ACTION_START = "com.arcadesoftware.lykonshield.START"
         const val ACTION_STOP = "com.arcadesoftware.lykonshield.STOP"
 
@@ -403,6 +404,37 @@ class LykonVpnService : VpnService() {
         }
 
         var shouldBlock = isContentBlocked
+        if (isContentBlocked) {
+            val now = System.currentTimeMillis()
+            if (now - lastContentBlockNotificationTime > 3000L) {
+                lastContentBlockNotificationTime = now
+                val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    val channel = android.app.NotificationChannel(
+                        "lykon_content_blocks",
+                        "Content Blocking Alerts",
+                        NotificationManager.IMPORTANCE_HIGH
+                    ).apply { description = "Alerts when restricted content is blocked" }
+                    nm.createNotificationChannel(channel)
+                }
+                
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
+                val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+                val builder = androidx.core.app.NotificationCompat.Builder(this, "lykon_content_blocks")
+                    .setSmallIcon(R.drawable.dark_icon)
+                    .setContentTitle("Access Blocked")
+                    .setContentText("$domain was blocked by Lykon Shield")
+                    .setPriority(androidx.core.app.NotificationCompat.PRIORITY_HIGH)
+                    .setAutoCancel(true)
+                    .setOnlyAlertOnce(true)
+                    .setContentIntent(pendingIntent)
+                    
+                nm.notify(1002, builder.build())
+            }
+        }
         if (!shouldBlock && isShieldOn) {
             shouldBlock = AdblockEngine.shouldBlockDomain(domain, packageName)
             if (shouldBlock && !AdblockEngine.isDoHProvider(domain)) {

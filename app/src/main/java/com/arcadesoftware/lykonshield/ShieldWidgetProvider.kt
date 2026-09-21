@@ -30,6 +30,16 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle
+    ) {
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions)
+        updateAppWidget(context, appWidgetManager, appWidgetId)
+    }
+
     private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
         val statsPrefs = context.getSharedPreferences("lykon_shield_stats", Context.MODE_PRIVATE)
 
@@ -118,6 +128,14 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_root, appPendingIntent)
+
+        val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+        val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+        if (minWidth > 0 && minWidth < 200) {
+            views.setViewVisibility(R.id.widget_legend_container, android.view.View.GONE)
+        } else {
+            views.setViewVisibility(R.id.widget_legend_container, android.view.View.VISIBLE)
+        }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
