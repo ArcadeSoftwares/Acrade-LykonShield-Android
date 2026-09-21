@@ -74,7 +74,8 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(R.id.widget_total_label, displayLabel)
 
         // Draw Pie Chart
-        val bitmap = createCategoriesPieChartBitmap(context, sortedCategories, totalBlocks)
+        val top5Categories = sortedCategories.take(5)
+        val bitmap = createCategoriesPieChartBitmap(context, top5Categories, totalBlocks)
         views.setImageViewBitmap(R.id.widget_pie_chart, bitmap)
 
         // Setup Legend Rows
