@@ -77,12 +77,26 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         views.setTextViewText(R.id.widget_total_label, displayLabel)
 
         // Draw Pie Chart
+        // The default 5 categories to ALWAYS show
+        val defaultCats = listOf("AD", "TRACKER", "ANALYTICS", "MALWARE", "SOCIAL")
+        
+        // Merge the actual blocked categories with the defaults
+        val mergedMap = mutableMapOf<String, Int>()
+        defaultCats.forEach { mergedMap[it] = 0 }
+        
+        sortedCategories.forEach {
+            val key = it.key.uppercase()
+            mergedMap[key] = it.value
+        }
+        
+        val mergedSorted = mergedMap.entries.sortedByDescending { it.value }
+        
         val displayCategories = mutableListOf<Map.Entry<String, Int>>()
-        if (sortedCategories.size <= 6) {
-            displayCategories.addAll(sortedCategories)
+        if (mergedSorted.size <= 6) {
+            displayCategories.addAll(mergedSorted)
         } else {
-            displayCategories.addAll(sortedCategories.take(5))
-            val extraCount = sortedCategories.drop(5).sumOf { it.value }
+            displayCategories.addAll(mergedSorted.take(5))
+            val extraCount = mergedSorted.drop(5).sumOf { it.value }
             if (extraCount > 0) {
                 displayCategories.add(java.util.AbstractMap.SimpleEntry("Extra", extraCount))
             }
@@ -97,24 +111,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val rowNames = listOf(R.id.row_0_name, R.id.row_1_name, R.id.row_2_name, R.id.row_3_name, R.id.row_4_name, R.id.row_5_name)
         val rowPercents = listOf(R.id.row_0_percent, R.id.row_1_percent, R.id.row_2_percent, R.id.row_3_percent, R.id.row_4_percent, R.id.row_5_percent)
         val rowCounts = listOf(R.id.row_0_count, R.id.row_1_count, R.id.row_2_count, R.id.row_3_count, R.id.row_4_count, R.id.row_5_count)
-        
-        if (displayCategories.isEmpty()) {
-            views.setViewVisibility(R.id.widget_empty_state, android.view.View.VISIBLE)
-            views.setViewVisibility(R.id.widget_content, android.view.View.GONE)
-            
-            // Fix light theme issue (white icon on white background)
-            val primaryColor = androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary)
-            val iconColor = if (isProtectionEnabled) primaryColor else android.graphics.Color.parseColor("#8E8E93")
-            views.setInt(R.id.widget_empty_logo, "setColorFilter", iconColor)
-            
-            if (!isProtectionEnabled) {
-                views.setTextColor(R.id.widget_empty_text, android.graphics.Color.parseColor("#8E8E93"))
-            } else {
-                views.setTextColor(R.id.widget_empty_text, primaryColor)
-            }
-        } else {
-            views.setViewVisibility(R.id.widget_empty_state, android.view.View.GONE)
-            views.setViewVisibility(R.id.widget_content, android.view.View.VISIBLE)
+
 
         for (i in 0 until 6) {
             if (i < displayCategories.size) {
@@ -142,8 +139,6 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 views.setViewVisibility(rowLayouts[i], android.view.View.GONE)
             }
         }
-        }
-
         // Open app when clicking background
         val appIntent = Intent(context, MainActivity::class.java)
         val appPendingIntent = PendingIntent.getActivity(
