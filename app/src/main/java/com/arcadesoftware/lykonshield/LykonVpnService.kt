@@ -77,21 +77,6 @@ class LykonVpnService : VpnService() {
         )
 
         // Content blocking domain patterns
-        private val YT_SHORTS_DOMAINS = setOf(
-            "shorts.youtube.com", "m.youtube.com/shorts", "yt3.ggpht.com"
-        )
-        private val INSTAGRAM_DOMAINS = setOf(
-            "instagram.com", "cdninstagram.com", "ig.me", "threads.net"
-        )
-        private val TIKTOK_DOMAINS = setOf(
-            "tiktok.com", "tiktokcdn.com", "tiktokv.com", "byteoversea.com", "ibytedtos.com", "musical.ly"
-        )
-        private val FACEBOOK_DOMAINS = setOf(
-            "facebook.com", "fbcdn.net", "fbsbx.com", "meta.com"
-        )
-        private val SNAPCHAT_DOMAINS = setOf(
-            "snapchat.com", "sc-cdn.net", "snap-dev.net"
-        )
         private val ADULT_DOMAINS = setOf(
             "pornhub.com", "xvideos.com", "xnxx.com", "xhamster.com", "redtube.com",
             "youporn.com", "chaturbate.com", "onlyfans.com", "stripchat.com", "livejasmin.com",
@@ -405,18 +390,12 @@ class LykonVpnService : VpnService() {
         val blockContentAlways = prefs.getBoolean("block_content_always", true)
 
         // ─── Content Blocking Filters (Social / Safety / Custom Websites) ───
-        val blockInstagram = prefs.getBoolean("block_instagram", false)
-        val blockTikTok = prefs.getBoolean("block_tiktok", false)
         val blockAdultContent = prefs.getBoolean("block_adult_content", false)
         val customBlockedWebsites = prefs.getStringSet("custom_blocked_websites", emptySet()) ?: emptySet()
 
         var isContentBlocked = false
         if (isShieldOn || blockContentAlways) {
-            if (blockInstagram && INSTAGRAM_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
-                isContentBlocked = true
-            } else if (blockTikTok && TIKTOK_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
-                isContentBlocked = true
-            } else if (blockAdultContent && ADULT_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+            if (blockAdultContent && ADULT_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
                 isContentBlocked = true
             } else if (customBlockedWebsites.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
                 isContentBlocked = true

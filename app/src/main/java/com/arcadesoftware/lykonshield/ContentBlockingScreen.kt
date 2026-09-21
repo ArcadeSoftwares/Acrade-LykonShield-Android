@@ -34,18 +34,13 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Explicit
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.PlayCircle
 import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Shield
-import androidx.compose.material.icons.outlined.Timer
-import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -88,17 +83,8 @@ fun ContentBlockingScreen(
     val contentColor = if (isLightTheme) Color.Black else Color.White
     val systemBlue = if (isLightTheme) Color(0xFF007AFF) else Color(0xFF0A84FF)
 
-    val isAccessibilityGranted = remember {
-        mutableStateOf(LykonAccessibilityService.isAccessibilityServiceEnabled(context))
-    }
 
     var blockContentAlways by remember { mutableStateOf(prefs.getBoolean("block_content_always", true)) }
-    var blockYtShortsInApp by remember {
-        mutableStateOf(prefs.getBoolean("block_yt_shorts_in_app", false) && isAccessibilityGranted.value)
-    }
-    var dailyShortsLimitMinutes by remember { mutableIntStateOf(prefs.getInt("daily_shorts_limit_minutes", 0)) }
-    var blockInstagram by remember { mutableStateOf(prefs.getBoolean("block_instagram", false)) }
-    var blockTikTok by remember { mutableStateOf(prefs.getBoolean("block_tiktok", false)) }
     var blockAdultContent by remember { mutableStateOf(prefs.getBoolean("block_adult_content", false)) }
 
     var blockedWebsites by remember {
@@ -114,18 +100,6 @@ fun ContentBlockingScreen(
 
     LaunchedEffect(blockContentAlways) {
         prefs.edit().putBoolean("block_content_always", blockContentAlways).apply()
-    }
-    LaunchedEffect(blockYtShortsInApp) {
-        prefs.edit().putBoolean("block_yt_shorts_in_app", blockYtShortsInApp).apply()
-    }
-    LaunchedEffect(dailyShortsLimitMinutes) {
-        prefs.edit().putInt("daily_shorts_limit_minutes", dailyShortsLimitMinutes).apply()
-    }
-    LaunchedEffect(blockInstagram) {
-        prefs.edit().putBoolean("block_instagram", blockInstagram).apply()
-    }
-    LaunchedEffect(blockTikTok) {
-        prefs.edit().putBoolean("block_tiktok", blockTikTok).apply()
     }
     LaunchedEffect(blockAdultContent) {
         prefs.edit().putBoolean("block_adult_content", blockAdultContent).apply()
@@ -202,229 +176,6 @@ fun ContentBlockingScreen(
                                     subtitle = "Keep content filters, YouTube Shorts limits & custom blocks active even when main shield is paused",
                                     checked = blockContentAlways,
                                     onCheckedChange = { blockContentAlways = it },
-                                    backdrop = backdrop,
-                                    showDivider = false
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Focus & Digital Wellbeing (Shorts, Reels, TikTok)
-                item {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "FOCUS & DIGITAL WELLBEING",
-                                color = Color.Gray,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                letterSpacing = 0.5.sp
-                            )
-                            if (!isFilterActive) {
-                                Text(
-                                    text = "Shield Paused",
-                                    color = Color(0xFFFF9500),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
-
-                        GlassCard(
-                            backdrop = backdrop,
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp)
-                        ) {
-                            Column(modifier = Modifier.fillMaxWidth()) {
-                                // YouTube Shorts
-                                IosBlockingToggleRow(
-                                    icon = Icons.Outlined.PlayCircle,
-                                    iconTint = Color(0xFFFF3B30),
-                                    title = "YouTube Shorts",
-                                    subtitle = if (dailyShortsLimitMinutes > 0) {
-                                        "Daily allowance: $dailyShortsLimitMinutes min/day"
-                                    } else {
-                                        "Instantly close and exit Shorts feed"
-                                    },
-                                    checked = (blockYtShortsInApp || dailyShortsLimitMinutes > 0) && isFilterActive,
-                                    enabled = isFilterActive,
-                                    onCheckedChange = { enabled ->
-                                        if (enabled) {
-                                            val granted = LykonAccessibilityService.isAccessibilityServiceEnabled(context)
-                                            if (granted) {
-                                                blockYtShortsInApp = true
-                                            } else {
-                                                blockYtShortsInApp = false
-                                                LykonAccessibilityService.openAccessibilitySettings(context)
-                                            }
-                                        } else {
-                                            blockYtShortsInApp = false
-                                            dailyShortsLimitMinutes = 0
-                                        }
-                                    },
-                                    backdrop = backdrop,
-                                    showDivider = true
-                                )
-
-                                // Accessibility warning banner if enabled but permission missing
-                                val accessibilityOk = LykonAccessibilityService.isAccessibilityServiceEnabled(context)
-                                if ((blockYtShortsInApp || dailyShortsLimitMinutes > 0) && !accessibilityOk) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp, vertical = 8.dp)
-                                            .clip(RoundedCornerShape(12.dp))
-                                            .background(Color(0xFFFF9500).copy(alpha = 0.12f))
-                                            .clickable { LykonAccessibilityService.openAccessibilitySettings(context) }
-                                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Warning,
-                                            contentDescription = null,
-                                            tint = Color(0xFFFF9500),
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = "Accessibility Service Required",
-                                                color = Color(0xFFFF9500),
-                                                fontSize = 12.sp,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                            Text(
-                                                text = "Tap here to enable Lykon Shield in Android Accessibility settings.",
-                                                color = contentColor.copy(alpha = 0.7f),
-                                                fontSize = 11.sp
-                                            )
-                                        }
-                                    }
-                                }
-
-                                // Daily Shorts Allowance Pills
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Outlined.Timer,
-                                                contentDescription = null,
-                                                tint = Color.Gray,
-                                                modifier = Modifier.size(15.dp)
-                                            )
-                                            Text(
-                                                text = "Daily Allowance",
-                                                fontSize = 13.sp,
-                                                fontWeight = FontWeight.Medium,
-                                                color = if (isFilterActive) contentColor else contentColor.copy(alpha = 0.4f)
-                                            )
-                                        }
-                                        Text(
-                                            text = if (dailyShortsLimitMinutes == 0) "100% Blocked" else "$dailyShortsLimitMinutes min / day",
-                                            fontSize = 12.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = if (!isFilterActive) Color.Gray else if (dailyShortsLimitMinutes == 0) Color(0xFFFF3B30) else systemBlue
-                                        )
-                                    }
-
-                                    // Quick limit selector capsules
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        listOf(0, 5, 15, 30, 60).forEach { mins ->
-                                            val isSelected = dailyShortsLimitMinutes == mins && (blockYtShortsInApp || dailyShortsLimitMinutes > 0) && isFilterActive
-                                            val label = if (mins == 0) "0m" else "${mins}m"
-                                            Box(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .clip(RoundedCornerShape(10.dp))
-                                                    .background(
-                                                        if (isSelected) {
-                                                            if (mins == 0) Color(0xFFFF3B30).copy(alpha = 0.2f) else systemBlue.copy(alpha = 0.2f)
-                                                        } else {
-                                                            if (isLightTheme) Color.Black.copy(alpha = 0.05f) else Color.White.copy(alpha = 0.08f)
-                                                        }
-                                                    )
-                                                    .clickable(enabled = isFilterActive) {
-                                                        val granted = LykonAccessibilityService.isAccessibilityServiceEnabled(context)
-                                                        if (!granted) {
-                                                            LykonAccessibilityService.openAccessibilitySettings(context)
-                                                        } else {
-                                                            dailyShortsLimitMinutes = mins
-                                                            blockYtShortsInApp = (mins == 0)
-                                                        }
-                                                    }
-                                                    .padding(vertical = 7.dp),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    text = label,
-                                                    fontSize = 11.sp,
-                                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                                    color = if (!isFilterActive) {
-                                                        contentColor.copy(alpha = 0.3f)
-                                                    } else if (isSelected) {
-                                                        if (mins == 0) Color(0xFFFF3B30) else systemBlue
-                                                    } else {
-                                                        contentColor.copy(alpha = 0.7f)
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-
-                                // Divider
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(0.5.dp)
-                                        .padding(start = 58.dp)
-                                        .background(if (isLightTheme) Color(0xFFE5E5EA) else Color(0xFF38383A))
-                                )
-
-                                // Instagram & Reels
-                                IosBlockingToggleRow(
-                                    icon = Icons.Outlined.VisibilityOff,
-                                    iconTint = Color(0xFFFF2D55),
-                                    title = "Instagram Feeds & Reels",
-                                    subtitle = "Blocks Instagram API, story CDN, and reels endpoints",
-                                    checked = blockInstagram && isFilterActive,
-                                    enabled = isFilterActive,
-                                    onCheckedChange = { blockInstagram = it },
-                                    backdrop = backdrop,
-                                    showDivider = true
-                                )
-
-                                // TikTok & ByteDance
-                                IosBlockingToggleRow(
-                                    icon = Icons.Outlined.Block,
-                                    iconTint = Color(0xFF00C7BE),
-                                    title = "TikTok & ByteDance",
-                                    subtitle = "Blocks TikTok short-video stream, ads and telemetry servers",
-                                    checked = blockTikTok && isFilterActive,
-                                    enabled = isFilterActive,
-                                    onCheckedChange = { blockTikTok = it },
                                     backdrop = backdrop,
                                     showDivider = false
                                 )
