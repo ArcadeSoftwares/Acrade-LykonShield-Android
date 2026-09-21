@@ -158,7 +158,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeWidth = 26f
-            strokeCap = Paint.Cap.BUTT
+            strokeCap = Paint.Cap.ROUND
         }
         
         val rect = RectF(20f, 20f, size - 20f, size - 20f)
@@ -170,7 +170,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         }
         
         var startAngle = -90f
-        val gap = if (categories.size > 1) 3f else 0f
+        val gap = if (categories.size > 1) 12f else 0f
 
         for (cat in categories) {
             val sweep = (cat.value.toFloat() / total) * 360f
