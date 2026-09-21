@@ -1,3 +1,10 @@
 ||graph.facebook.com^
 ||z-m-gateway.facebook.com^
 ||kxjwm.com^
+||d.applvn.com^
+||rt.applvn.com^
+||analytics-tcp.mintegral.net^
+||sdkapi-ga.biggogo.com^
+||cdn6.biggogo.com^
+||cab.6cnz5b.com^
+||app.r2c7a0.com^
