@@ -307,6 +307,7 @@ class MainActivity : ComponentActivity() {
 
                 val homeState = rememberLazyListState()
                 val blockedState = rememberLazyListState()
+                var isAppDetailPopupOpen by remember { mutableStateOf(false) }
                 val contentBlockingState = rememberLazyListState()
                 val settingsState = rememberLazyListState()
 
@@ -330,7 +331,7 @@ class MainActivity : ComponentActivity() {
                 val statusBarPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
                 val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-                val showBars = currentRoute in listOf("home", "blocked", "content_blocking", "settings")
+                val showBars = currentRoute in listOf("home", "blocked", "content_blocking", "settings") && !isAppDetailPopupOpen
                 val dialogBackdrop = rememberLayerBackdrop()
 
                 Box(
@@ -374,7 +375,8 @@ class MainActivity : ComponentActivity() {
                                     isAdvancedNetworkStatsEnabled = isAdvancedNetworkStatsEnabled,
                                     topPadding = 12.dp + statusBarPadding,
                                     bottomPadding = 88.dp + navBarPadding,
-                                    backdrop = backgroundBackdrop
+                                    backdrop = backgroundBackdrop,
+                                    onPopupStateChange = { isAppDetailPopupOpen = it }
                                 )
                             }
                             composable("content_blocking") {

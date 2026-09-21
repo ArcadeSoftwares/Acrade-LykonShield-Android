@@ -78,7 +78,8 @@ fun BlockedScreen(
     isAdvancedNetworkStatsEnabled: Boolean,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
-    backdrop: Backdrop
+    backdrop: Backdrop,
+    onPopupStateChange: (Boolean) -> Unit = {}
 ) {
     val isLightTheme = LocalIsLightTheme.current
     val contentColor = if (isLightTheme) Color.Black else Color.White
@@ -88,6 +89,9 @@ fun BlockedScreen(
     var selectedTab by remember { mutableStateOf(0) } // 0 = Apps, 1 = Network
     var selectedGraphTab by remember { mutableStateOf(0) } // 0 = Real-time, 1 = Daily, 2 = Categories
     var selectedAppForDetails by remember { mutableStateOf<AppBlockInfo?>(null) }
+    LaunchedEffect(selectedAppForDetails) {
+        onPopupStateChange(selectedAppForDetails != null)
+    }
     var trafficSearchQuery by remember { mutableStateOf("") }
 
     // Load active apps with JNI details
@@ -607,7 +611,7 @@ fun BlockedScreen(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            GlassCard(
+            IosBaseDialogCard(
                 backdrop = rememberCombinedBackdrop(backdrop, dialogBackdrop),
                 modifier = Modifier
                     .width(320.dp)
