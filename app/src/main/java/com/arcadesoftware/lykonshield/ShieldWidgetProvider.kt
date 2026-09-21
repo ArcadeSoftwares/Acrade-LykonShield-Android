@@ -181,11 +181,14 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 }
         }
 
-        val sortedCategories =
-            categoryCounts.entries
-                .sortedByDescending {
-                    it.value
-                }
+        val adsCount = categoryCounts["AD"] ?: 0
+        val trackersCount = categoryCounts["TRACKER"] ?: 0
+        
+        val sortedCategories = listOf(
+            java.util.AbstractMap.SimpleEntry("Total", totalBlocks),
+            java.util.AbstractMap.SimpleEntry("Ads", adsCount),
+            java.util.AbstractMap.SimpleEntry("Trackers", trackersCount)
+        )
 
         // =========================================================
         // TOTAL COUNT
@@ -299,12 +302,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 val category =
                     sortedCategories[i]
 
-                val categoryName =
-                    category.key
-                        .lowercase(Locale.getDefault())
-                        .replaceFirstChar {
-                            it.uppercase()
-                        }
+                val categoryName = category.key
 
                 val percent =
                     if (totalBlocks > 0) {
@@ -526,7 +524,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             return bitmap
         }
 
-        val maxVal = categories[0].value.toFloat()
+        val maxVal = total.toFloat().coerceAtLeast(1f)
         var currentRadius = (sizePx / 2f) - (strokeWidth / 2f)
 
         for (i in 0 until minOf(3, categories.size)) {
@@ -545,7 +543,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             canvas.drawArc(rect, 0f, 360f, false, paint)
             
             // Draw foreground progress
-            val sweep = (category.value / maxVal) * 280f + 20f // Give it some minimum visual weight
+            val sweep = if (category.value >= total && total > 0) 360f else (category.value / maxVal) * 340f + 5f
             paint.color = color
             canvas.drawArc(rect, -90f, sweep.coerceAtMost(360f), false, paint)
             
