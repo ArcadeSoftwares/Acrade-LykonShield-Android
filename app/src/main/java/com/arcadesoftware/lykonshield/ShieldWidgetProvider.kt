@@ -49,7 +49,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             }
         }
 
-        val categoryString = statsPrefs.getString("category_blocks", "") ?: ""
+        val categoryString = statsPrefs.getString("today_category_blocks_$todayKey", "") ?: ""
         val categoryCounts = mutableMapOf<String, Int>()
         var totalBlocks = 0
         

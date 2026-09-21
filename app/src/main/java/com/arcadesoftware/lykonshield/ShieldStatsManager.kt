@@ -62,6 +62,7 @@ object ShieldStatsManager {
             todayBlockedTrackers = 0
             todayAdsBlocked = 0
             todayTotalBlocks = 0
+            todayCategoryBlockCounts.clear()
             // We should also clear or reset today-specific lists if needed, but counts are primary.
         } else if (currentDayKey == "") {
             currentDayKey = todayDayKey
@@ -209,6 +210,7 @@ object ShieldStatsManager {
 
     /** Per-category block counts: categoryName -> blockCount. */
     val categoryBlockCounts = mutableStateMapOf<String, Int>()
+    val todayCategoryBlockCounts = mutableStateMapOf<String, Int>()
 
     /** Per-app top domains block counts: packageName -> domain -> count. */
     val appTopDomainsMap = mutableStateMapOf<String, MutableMap<String, Int>>()
@@ -398,9 +400,12 @@ object ShieldStatsManager {
 
             val dailyString = dailyBlockHistory.entries.joinToString(",") { "${it.key}:${it.value}" }
             putString(KEY_DAILY_BLOCKS, dailyString)
-
+            
             val categoryString = categoryBlockCounts.entries.joinToString(",") { "${it.key}:${it.value}" }
             putString(KEY_CATEGORY_BLOCKS, categoryString)
+            
+            val todayCategoryString = todayCategoryBlockCounts.entries.joinToString(",") { "${it.key}:${it.value}" }
+            putString("today_category_blocks_$todayDayKey", todayCategoryString)
 
             val topDomainsObj = org.json.JSONObject()
             appTopDomainsMap.forEach { (pkg, domains) ->
@@ -491,6 +496,7 @@ object ShieldStatsManager {
             // ── Per-category counts ──────────────────────────────────────
             val catName = category.name
             categoryBlockCounts[catName] = (categoryBlockCounts[catName] ?: 0) + 1
+            todayCategoryBlockCounts[catName] = (todayCategoryBlockCounts[catName] ?: 0) + 1
 
             // ── Daily history counts ──────────────────────────────────────
             val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
