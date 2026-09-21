@@ -170,7 +170,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         }
         
         var startAngle = -90f
-        val gap = if (categories.size > 1) 12f else 0f
+        val gap = if (categories.size > 1) 20f else 0f
 
         for (cat in categories) {
             val sweep = (cat.value.toFloat() / total) * 360f
@@ -179,7 +179,9 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             if (sweep > gap) {
                 canvas.drawArc(rect, startAngle + gap / 2f, sweep - gap, false, paint)
             } else if (sweep > 0) {
-                canvas.drawArc(rect, startAngle, sweep, false, paint)
+                // For segments too small to fit the gap, draw a circular dot (0.1 sweep)
+                // in the center of their allocated space to minimize overlap
+                canvas.drawArc(rect, startAngle + sweep / 2f, 0.1f, false, paint)
             }
             startAngle += sweep
         }
