@@ -40,7 +40,8 @@ object FilterListUpdater {
         AdblockEngine.FilterSources.BRAVE_SPECIFIC_URL to "brave-specific.txt",
         AdblockEngine.FilterSources.BRAVE_SOCIAL_URL to "brave-social.txt",
         AdblockEngine.FilterSources.BRAVE_FIRSTPARTY_URL to "brave-firstparty.txt",
-        AdblockEngine.FilterSources.BRAVE_ANDROID_SPECIFIC_URL to "brave-android-specific.txt"
+        AdblockEngine.FilterSources.BRAVE_ANDROID_SPECIFIC_URL to "brave-android-specific.txt",
+        AdblockEngine.FilterSources.ADGUARD_MOBILE_URL to "adguard-mobile.txt"
     )
 
     /**
@@ -50,7 +51,7 @@ object FilterListUpdater {
      * @param context Application context
      * @param force If true, ignore the 24-hour cooldown and update immediately
      */
-    fun checkAndUpdate(context: Context, force: Boolean = false) {
+    fun checkAndUpdate(context: Context, force: Boolean = false, onComplete: ((Boolean) -> Unit)? = null) {
         val appContext = context.applicationContext
 
         if (!force) {
@@ -59,6 +60,9 @@ object FilterListUpdater {
             val elapsed = System.currentTimeMillis() - lastUpdate
             if (elapsed < UPDATE_INTERVAL_MS) {
                 Log.d(TAG, "Filter lists are fresh (updated ${elapsed / 3600000}h ago). Skipping.")
+                if (onComplete != null) {
+                    android.os.Handler(android.os.Looper.getMainLooper()).post { onComplete(true) }
+                }
                 return
             }
         }
@@ -66,16 +70,25 @@ object FilterListUpdater {
         // Prevent concurrent updates
         if (!isUpdating.compareAndSet(false, true)) {
             Log.d(TAG, "Update already in progress. Skipping.")
+            if (onComplete != null) {
+                android.os.Handler(android.os.Looper.getMainLooper()).post { onComplete(false) }
+            }
             return
         }
 
         Thread({
+            var success = false
             try {
-                performUpdate(appContext)
+                success = performUpdate(appContext)
             } catch (e: Exception) {
                 Log.e(TAG, "Filter update failed", e)
             } finally {
                 isUpdating.set(false)
+                if (onComplete != null) {
+                    android.os.Handler(android.os.Looper.getMainLooper()).post {
+                        onComplete(success)
+                    }
+                }
             }
         }, "filter-updater").start()
     }
@@ -97,7 +110,7 @@ object FilterListUpdater {
     // Internal
     // ══════════════════════════════════════════════════════════════════════
 
-    private fun performUpdate(context: Context) {
+    private fun performUpdate(context: Context): Boolean {
         Log.d(TAG, "Starting filter list update...")
         val startTime = System.currentTimeMillis()
 
@@ -139,7 +152,9 @@ object FilterListUpdater {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to reload AdblockEngine after update", e)
             }
+            return true
         }
+        return false
     }
 
     /**

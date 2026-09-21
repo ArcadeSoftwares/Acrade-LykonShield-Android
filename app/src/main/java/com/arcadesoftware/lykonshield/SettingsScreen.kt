@@ -284,7 +284,7 @@ fun SettingsScreen(
 fun IosBaseDialogCard(
     backdrop: Backdrop,
     modifier: Modifier = Modifier.width(320.dp),
-    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(32.dp),
     content: @Composable BoxScope.() -> Unit
 ) {
     GlassCard(
@@ -411,17 +411,17 @@ fun IosThemeDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(50))
                     .background(systemBlue)
                     .clickable { onDismiss() }
-                    .padding(vertical = 11.dp),
+                    .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Done",
                     color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -538,17 +538,17 @@ fun IosDeveloperDetailsDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(50))
                     .background(systemBlue)
                     .clickable { onDismiss() }
-                    .padding(vertical = 11.dp),
+                    .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Close",
                     color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -825,36 +825,36 @@ fun IosWidgetPromptDialog(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(50))
                         .background(if (isLightTheme) Color.Black.copy(0.05f) else Color.White.copy(0.1f))
                         .clickable { onDismiss() }
-                        .padding(vertical = 11.dp),
+                        .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Later",
                         color = textColor,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(50))
                         .background(systemBlue)
                         .clickable { 
                             onAddWidget()
                             onDismiss() 
                         }
-                        .padding(vertical = 11.dp),
+                        .padding(vertical = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Add",
+                        text = "Add Widget",
                         color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }

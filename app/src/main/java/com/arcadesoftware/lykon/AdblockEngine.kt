@@ -46,12 +46,13 @@ object AdblockEngine {
         const val BRAVE_SOCIAL_URL = "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-social.txt"
         const val BRAVE_FIRSTPARTY_URL = "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-firstparty.txt"
         const val BRAVE_ANDROID_SPECIFIC_URL = "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-android-specific.txt"
+        const val ADGUARD_MOBILE_URL = "https://filters.adtidy.org/extension/chromium/filters/11.txt"
     }
 
     // ── Filter file names (used in both assets and internal storage) ─────
 
-    private val FILTER_FILES = listOf("brave-unbreak.txt", "brave-specific.txt", "brave-social.txt", "brave-firstparty.txt", "brave-android-specific.txt")
-    private val EXTRA_FILTER_FILES = listOf<String>()
+    private val FILTER_FILES = listOf("brave-unbreak.txt", "brave-specific.txt", "brave-social.txt", "brave-firstparty.txt", "brave-android-specific.txt", "adguard-mobile.txt")
+    private val EXTRA_FILTER_FILES = listOf("custom-blocklist.txt")
     const val FILTERS_DIR = "filters"
 
     // --- Engine State ---
@@ -344,7 +345,7 @@ object AdblockEngine {
                 if (storageFile.exists() && storageFile.length() > 0) {
                     Log.d(TAG, "Loading filter from storage: $file (${storageFile.length()} bytes)")
                     storageFile.bufferedReader().use { reader -> parseFilterLines(reader, blocked, allowed) }
-                } else if (file in FILTER_FILES) {
+                } else {
                     Log.d(TAG, "Loading filter from assets: $file")
                     context.assets.open(file).use { input -> parseFilterLines(input.bufferedReader(), blocked, allowed) }
                 }
@@ -366,7 +367,7 @@ object AdblockEngine {
                 val storageFile = File(context.filesDir, "$FILTERS_DIR/$file")
                 if (storageFile.exists() && storageFile.length() > 0) {
                     filters.add(storageFile.readText())
-                } else if (file in FILTER_FILES) {
+                } else {
                     context.assets.open(file).use { input -> filters.add(input.bufferedReader().readText()) }
                 }
             } catch (e: Exception) {

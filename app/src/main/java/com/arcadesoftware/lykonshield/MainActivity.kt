@@ -466,7 +466,7 @@ class MainActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
-                                .width(312.dp)
+                                .width(280.dp)
                                 .navigationBarsPadding()
                                 .padding(bottom = 16.dp)
                         ) {
@@ -579,7 +579,7 @@ class MainActivity : ComponentActivity() {
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth(0.85f)
+                                    .width(320.dp)
                                     .clickable(enabled = false) {}
                             ) {
                                 IosWidgetPromptDialog(

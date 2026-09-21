@@ -1,4 +1,5 @@
 package com.arcadesoftware.lykonshield
+import androidx.compose.material.icons.Icons
 
 import android.content.Context
 import android.graphics.drawable.Drawable
@@ -14,9 +15,22 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
+
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
+
+import androidx.compose.material.icons.filled.PieChart
+import androidx.compose.material.icons.outlined.PieChart
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.filled.ShowChart
+import androidx.compose.material.icons.outlined.ShowChart
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.outlined.Apps
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.outlined.Public
+import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -74,6 +88,7 @@ fun BlockedScreen(
     var selectedTab by remember { mutableStateOf(0) } // 0 = Apps, 1 = Network
     var selectedGraphTab by remember { mutableStateOf(0) } // 0 = Real-time, 1 = Daily, 2 = Categories
     var selectedAppForDetails by remember { mutableStateOf<AppBlockInfo?>(null) }
+    var trafficSearchQuery by remember { mutableStateOf("") }
 
     // Load active apps with JNI details
     var blockedAppList by remember { mutableStateOf<List<AppBlockInfo>>(emptyList()) }
@@ -117,13 +132,14 @@ fun BlockedScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .layerBackdrop(dialogBackdrop)
+                .layerBackdrop(dialogBackdrop),
+            contentAlignment = Alignment.TopCenter
         ) {
             LazyColumn(
                 state = state,
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(top = topPadding, bottom = bottomPadding + 16.dp, start = 16.dp, end = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier.fillMaxHeight().widthIn(max = 600.dp),
+                contentPadding = PaddingValues(top = topPadding, bottom = bottomPadding + 24.dp, start = 24.dp, end = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
         item {
             Text(
@@ -215,9 +231,9 @@ fun BlockedScreen(
                                             if (isLightTheme) Color.DarkGray.copy(alpha = 0.6f) else Color.LightGray.copy(alpha = 0.6f)
                                         }
                                         val icon = when (index) {
-                                            0 -> if (isSelected) CategoriesFilledIcon else CategoriesIcon
-                                            1 -> if (isSelected) DailyFilledIcon else DailyIcon
-                                            else -> if (isSelected) RealTimeFilledIcon else RealTimeIcon
+                                            0 -> if (isSelected) Icons.Filled.PieChart else Icons.Outlined.PieChart
+                                            1 -> if (isSelected) Icons.Filled.DateRange else Icons.Outlined.DateRange
+                                            else -> if (isSelected) Icons.Filled.ShowChart else Icons.Outlined.ShowChart
                                         }
                                         Icon(
                                             imageVector = icon,
@@ -314,9 +330,9 @@ fun BlockedScreen(
                                     if (isLightTheme) Color.DarkGray.copy(alpha = 0.6f) else Color.LightGray.copy(alpha = 0.6f)
                                 }
                                 val icon = when (index) {
-                                    0 -> if (isSelected) AppsFilledIcon else AppsIcon
-                                    1 -> if (isSelected) NetworkFilledIcon else NetworkIcon
-                                    else -> if (isSelected) TrafficFilledIcon else TrafficIcon
+                                    0 -> if (isSelected) Icons.Filled.Apps else Icons.Outlined.Apps
+                                    1 -> if (isSelected) Icons.Filled.Public else Icons.Outlined.Public
+                                    else -> if (isSelected) Icons.Filled.SwapVert else Icons.Outlined.SwapVert
                                 }
                                 Icon(
                                     imageVector = icon,
@@ -357,62 +373,68 @@ fun BlockedScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { selectedAppForDetails = app },
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(24.dp)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(14.dp),
+                                    .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f)
                                 ) {
                                     if (app.icon != null) {
-                                        AppIconImage(drawable = app.icon, modifier = Modifier.size(36.dp))
+                                        AppIconImage(drawable = app.icon, modifier = Modifier.size(44.dp))
                                     } else {
                                         Box(
                                             modifier = Modifier
-                                                .size(36.dp)
-                                                .clip(RoundedCornerShape(8.dp))
-                                                .background(if (isLightTheme) Color.Black.copy(0.08f) else Color.White.copy(0.12f)),
+                                                .size(44.dp)
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .background(if (isLightTheme) Color.Black.copy(0.06f) else Color.White.copy(0.12f)),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
                                                 text = app.label.take(1),
-                                                color = contentColor.copy(0.6f),
-                                                fontSize = 16.sp,
+                                                color = contentColor.copy(0.7f),
+                                                fontSize = 18.sp,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
                                     }
-                                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                         Text(
                                             text = app.label,
                                             color = contentColor,
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontSize = 17.sp,
+                                            fontWeight = FontWeight.SemiBold,
+                                            letterSpacing = (-0.5).sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                         Text(
-                                            text = "Ad & Tracker Redirection Securing",
+                                            text = "Ad & Tracker Routing Secured",
                                             color = Color.Gray,
-                                            fontSize = 12.sp
+                                            fontSize = 13.sp,
+                                            lineHeight = 16.sp
                                         )
                                     }
                                 }
                                 Box(
                                     modifier = Modifier
-                                        .clip(RoundedCornerShape(12.dp))
+                                        .clip(RoundedCornerShape(50))
                                         .background(Color(0xFFFF3B30).copy(alpha = 0.12f))
-                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
                                 ) {
                                     Text(
                                         text = "${app.count} blocks",
                                         color = Color(0xFFFF3B30),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = (-0.2).sp
                                     )
                                 }
                             }
@@ -436,31 +458,32 @@ fun BlockedScreen(
                         GlassCard(
                             backdrop = backdrop,
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(24.dp)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(14.dp),
+                                    .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(
                                     modifier = Modifier.weight(1f).padding(end = 12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Text(
                                         text = entry.domain,
                                         color = contentColor,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = (-0.3).sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = "Blocked request from ${entry.appName}",
                                         color = Color.Gray,
-                                        fontSize = 12.sp
+                                        fontSize = 13.sp
                                     )
                                 }
                                 val relativeTime = DateUtils.getRelativeTimeSpanString(
@@ -471,14 +494,41 @@ fun BlockedScreen(
                                 Text(
                                     text = relativeTime,
                                     color = Color.Gray,
-                                    fontSize = 11.sp
+                                    fontSize = 12.sp
                                 )
                             }
                         }
                     }
                 }
             } else {
-                val recentTraffic = ShieldStatsManager.recentTraffic.toList()
+                val allTraffic = ShieldStatsManager.recentTraffic.toList()
+                val recentTraffic = if (trafficSearchQuery.isBlank()) allTraffic else {
+                    allTraffic.filter { it.appName.contains(trafficSearchQuery, ignoreCase = true) }
+                }
+                
+                item {
+                    androidx.compose.foundation.text.BasicTextField(
+                        value = trafficSearchQuery,
+                        onValueChange = { trafficSearchQuery = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (isLightTheme) Color.Black.copy(0.05f) else Color.White.copy(0.1f))
+                            .padding(12.dp),
+                        textStyle = androidx.compose.ui.text.TextStyle(
+                            color = contentColor,
+                            fontSize = 16.sp
+                        ),
+                        decorationBox = { innerTextField ->
+                            if (trafficSearchQuery.isEmpty()) {
+                                Text("Filter by App Name...", color = Color.Gray)
+                            }
+                            innerTextField()
+                        }
+                    )
+                }
+                
                 if (recentTraffic.isEmpty()) {
                     item {
                         Text(
@@ -494,32 +544,33 @@ fun BlockedScreen(
                         GlassCard(
                             backdrop = backdrop,
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp)
+                            shape = RoundedCornerShape(24.dp)
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(14.dp),
+                                    .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(
                                     modifier = Modifier.weight(1f).padding(end = 12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
                                     Text(
                                         text = entry.domain,
                                         color = contentColor,
-                                        fontSize = 15.sp,
-                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        letterSpacing = (-0.3).sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
                                     Text(
                                         text = "${if (entry.isBlocked) "Blocked" else "Allowed"} request from ${entry.appName}",
                                         color = if (entry.isBlocked) Color(0xFFFF3B30) else Color(0xFF34C759),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                                 val relativeTime = DateUtils.getRelativeTimeSpanString(
@@ -530,7 +581,7 @@ fun BlockedScreen(
                                 Text(
                                     text = relativeTime,
                                     color = Color.Gray,
-                                    fontSize = 11.sp
+                                    fontSize = 12.sp
                                 )
                             }
                         }
@@ -565,7 +616,7 @@ fun BlockedScreen(
                         indication = null,
                         onClick = {}
                     ),
-                shape = RoundedCornerShape(28.dp)
+                shape = RoundedCornerShape(32.dp)
             ) {
                 AppDetailPopupContent(
                     app = app,

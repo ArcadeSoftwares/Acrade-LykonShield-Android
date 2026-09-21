@@ -54,6 +54,7 @@ fun DeveloperScreen(
     val contentColor = if (isLightTheme) Color.Black else Color.White
     var showBlurDialog by remember { mutableStateOf(false) }
     var showCacheDialog by remember { mutableStateOf(false) }
+    var showUpdateConfirmDialog by remember { mutableStateOf(false) }
 
     CompositionLocalProvider(LocalIsLiquidGlassEnabled provides true) {
         Box(
@@ -216,8 +217,7 @@ fun DeveloperScreen(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clickable {
-                                            android.widget.Toast.makeText(context, "Updating filter lists in background...", android.widget.Toast.LENGTH_SHORT).show()
-                                            com.arcadesoftware.lykonshield.FilterListUpdater.checkAndUpdate(context, true)
+                                            showUpdateConfirmDialog = true
                                         }
                                         .padding(16.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -267,25 +267,11 @@ fun DeveloperScreen(
             }
         }
 
-        // Full width blurred header top bar
+        // Header top bar (transparent)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp + topPadding)
-                .drawBackdrop(
-                    backdrop = screenContentBackdrop,
-                    shape = { RectangleShape },
-                    effects = {
-                        vibrancy()
-                        if (blurRadius > 0f) {
-                            blur(blurRadius.dp.toPx())
-                        }
-                    },
-                    onDrawSurface = {
-                        drawRect(if (isLightTheme) Color(0xFFFAFAFA).copy(0.4f) else Color(0xFF121212).copy(0.4f))
-                    }
-                )
-                .padding(top = topPadding, start = 16.dp),
+                .padding(top = topPadding + 8.dp, start = 16.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             LiquidButton(
@@ -331,6 +317,43 @@ fun DeveloperScreen(
         }
 
         // ios-style modal render cache size dialog
+        val context = androidx.compose.ui.platform.LocalContext.current 
+        if (showUpdateConfirmDialog) { 
+            Box( 
+                modifier = Modifier.fillMaxSize(), 
+                contentAlignment = Alignment.Center 
+            ) { 
+                Box( 
+                    modifier = Modifier 
+                        .fillMaxSize() 
+                        .layerBackdrop(dialogBackdrop) 
+                        .background(Color.Black.copy(alpha = if (isLightTheme) 0.08f else 0.3f)) 
+                        .clickable( 
+                            interactionSource = remember { MutableInteractionSource() }, 
+                            indication = null, 
+                            onClick = { showUpdateConfirmDialog = false } 
+                        ) 
+                ) 
+                LykonConfirmDialog( 
+                    title = "This will update the filter lists from Brave.", 
+                    confirmText = "Update", 
+                    cancelText = "Cancel", 
+                    onConfirm = { 
+                        showUpdateConfirmDialog = false 
+                        com.arcadesoftware.lykonshield.FilterListUpdater.checkAndUpdate(context, true) { success -> 
+                            if (success) { 
+                                android.widget.Toast.makeText(context, "Filter lists updated successfully.", android.widget.Toast.LENGTH_SHORT).show() 
+                            } else { 
+                                android.widget.Toast.makeText(context, "Failed to update filter lists.", android.widget.Toast.LENGTH_SHORT).show() 
+                            } 
+                        } 
+                    }, 
+                    onDismiss = { showUpdateConfirmDialog = false }, 
+                    backdrop = rememberCombinedBackdrop(backdrop, dialogBackdrop) 
+                ) 
+            } 
+        }
+
         if (showCacheDialog) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -483,17 +506,17 @@ fun IosBlurRadiusDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(50))
                     .background(systemBlue)
                     .clickable { onDismiss() }
-                    .padding(vertical = 11.dp),
+                    .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Done",
                     color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }
@@ -623,18 +646,93 @@ fun IosCacheSizeDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(RoundedCornerShape(50))
                     .background(systemBlue)
                     .clickable { onDismiss() }
-                    .padding(vertical = 11.dp),
+                    .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = "Done",
                     color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun LykonConfirmDialog(
+    title: String,
+    confirmText: String,
+    cancelText: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    backdrop: Backdrop
+) {
+    val isLightTheme = LocalIsLightTheme.current
+    val textColor = if (isLightTheme) Color.Black else Color.White
+
+    GlassCard(
+        backdrop = backdrop,
+        modifier = Modifier.width(320.dp),
+        shape = RoundedCornerShape(32.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Text(
+                text = title,
+                color = textColor,
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                lineHeight = 22.sp
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (isLightTheme) Color.Black.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.15f))
+                        .clickable { onDismiss() }
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = cancelText,
+                        color = textColor,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(50))
+                        .background(Color(0xFFFF3B30))
+                        .clickable { onConfirm() }
+                        .padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = confirmText,
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
