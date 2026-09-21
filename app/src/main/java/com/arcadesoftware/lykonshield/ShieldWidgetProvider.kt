@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import androidx.core.content.ContextCompat
 import android.graphics.RectF
 import android.view.View
 import android.widget.RemoteViews
@@ -221,7 +222,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             context,
             sortedCategories,
             totalBlocks,
-            96
+            68
         )
 
         views.setImageViewBitmap(
@@ -343,7 +344,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
 
                 views.setTextViewText(
                     rowNames[i],
-                    "/ $categoryName"
+                    categoryName
                 )
             }
         }
@@ -513,7 +514,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val strokeWidth = sizePx * 0.12f
+        val strokeWidth = sizePx * 0.14f
         val gap = strokeWidth * 0.4f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
@@ -522,7 +523,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         }
 
         if (total <= 0 || categories.isEmpty()) {
-            paint.color = Color.parseColor("#E0E0E0")
+            paint.color = ContextCompat.getColor(context, R.color.widget_track_empty)
             val inset = strokeWidth / 2f
             canvas.drawArc(RectF(inset, inset, sizePx - inset, sizePx - inset), 0f, 360f, false, paint)
             return bitmap
@@ -543,7 +544,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             val color = getColorForCategory(category.key)
             
             // Draw background track (lightened)
-            paint.color = Color.argb(40, Color.red(color), Color.green(color), Color.blue(color))
+            paint.color = Color.argb(64, Color.red(color), Color.green(color), Color.blue(color))
             canvas.drawArc(rect, 0f, 360f, false, paint)
             
             // Draw foreground progress
