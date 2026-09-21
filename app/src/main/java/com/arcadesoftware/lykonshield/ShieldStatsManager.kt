@@ -325,6 +325,20 @@ object ShieldStatsManager {
                         }
                     }
                 }
+                
+                // Restore today category block counts
+                val todayCategoryString = p.getString("today_category_blocks_$dayKey", "") ?: ""
+                if (todayCategoryString.isNotEmpty()) {
+                    todayCategoryBlockCounts.clear()
+                    todayCategoryString.split(",").forEach { entry ->
+                        val parts = entry.split(":")
+                        if (parts.size == 2) {
+                            parts[1].toIntOrNull()?.let { count ->
+                                todayCategoryBlockCounts[parts[0]] = count
+                            }
+                        }
+                    }
+                }
 
                 // Restore per-app detailed stats
                 try {
