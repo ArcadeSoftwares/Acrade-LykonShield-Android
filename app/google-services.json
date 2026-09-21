@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "983178184530",
+    "firebase_url": "https://stockgenius-23fb5-default-rtdb.firebaseio.com",
+    "project_id": "stockgenius-23fb5",
+    "storage_bucket": "stockgenius-23fb5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983178184530:android:129ca03392bd1b17841c8b",
+        "android_client_info": {
+          "package_name": "com.arcadesoftware.lykonshield"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983178184530-c0grj95ua7kb862qnr0f9nnhr2g3t5qt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWIRapRtomlncKZ5aPlaAAa63IXZLSY6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983178184530-c0grj95ua7kb862qnr0f9nnhr2g3t5qt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983178184530:android:61e43dd714ceaa3b841c8b",
+        "android_client_info": {
+          "package_name": "com.arcadesoftware.musix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "983178184530-pdnkk57vvnf9pkkcla6fainhhj66d23s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.arcadesoftware.musix",
+            "certificate_hash": "1b8e00333c8ba3056ca83b7b6d268166eeff4ffd"
+          }
+        },
+        {
+          "client_id": "983178184530-c0grj95ua7kb862qnr0f9nnhr2g3t5qt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWIRapRtomlncKZ5aPlaAAa63IXZLSY6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "983178184530-c0grj95ua7kb862qnr0f9nnhr2g3t5qt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
