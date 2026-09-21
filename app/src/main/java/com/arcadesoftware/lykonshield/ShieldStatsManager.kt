@@ -159,6 +159,13 @@ object ShieldStatsManager {
     // ── Compose-observable state ─────────────────────────────────────────────
 
     /** Total number of trackers blocked (TRACKER + ANALYTICS categories, plus one for every block). */
+    var todayBlockedTrackers by mutableStateOf(0)
+        private set
+    var todayAdsBlocked by mutableStateOf(0)
+        private set
+    var todayTotalBlocks by mutableStateOf(0)
+        private set
+
     var totalBlockedTrackers by mutableStateOf(0)
         private set
 
@@ -213,6 +220,12 @@ object ShieldStatsManager {
         prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs?.let { p ->
             mainHandler.post {
+                val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                val dayKey = sdf.format(java.util.Date())
+                todayBlockedTrackers = p.getInt("today_trackers_$dayKey", 0)
+                todayAdsBlocked = p.getInt("today_ads_$dayKey", 0)
+                todayTotalBlocks = p.getInt("today_total_$dayKey", 0)
+
                 totalBlockedTrackers = p.getInt(KEY_TOTAL_BLOCKED_TRACKERS, 0)
                 totalAdsBlocked = p.getInt(KEY_TOTAL_ADS_BLOCKED, 0)
                 totalDataSavedBytes = p.getLong(KEY_TOTAL_DATA_SAVED_BYTES, 0L)
@@ -337,6 +350,13 @@ object ShieldStatsManager {
 
     private fun performPersist(context: Context) {
         prefs?.edit()?.apply {
+            val todaySdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+            val todayDayKey = todaySdf.format(java.util.Date())
+            putInt("today_trackers_$todayDayKey", todayBlockedTrackers)
+            putInt("today_ads_$todayDayKey", todayAdsBlocked)
+            putInt("today_total_$todayDayKey", todayTotalBlocks)
+
+            
             putInt(KEY_TOTAL_BLOCKED_TRACKERS, totalBlockedTrackers)
             putInt(KEY_TOTAL_ADS_BLOCKED, totalAdsBlocked)
             putLong(KEY_TOTAL_DATA_SAVED_BYTES, totalDataSavedBytes)
@@ -424,9 +444,20 @@ object ShieldStatsManager {
 
         mainHandler.post {
             // ── Counters ─────────────────────────────────────────────────
+            val todaySdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+            val todayDayKey = todaySdf.format(java.util.Date())
+
             totalBlockedTrackers++
+            todayTotalBlocks++
             if (category == BlockCategory.AD) {
                 totalAdsBlocked++
+                todayAdsBlocked++
+            } else if (category == BlockCategory.TRACKER || category == BlockCategory.ANALYTICS) {
+                todayBlockedTrackers++
+            } else {
+                // If there's another category, just increment trackers as a fallback, 
+                // or just leave it. Let's increment it so Ads + Trackers roughly equals Total.
+                todayBlockedTrackers++
             }
 
             totalDataSavedBytes += AVG_BYTES_SAVED_PER_BLOCK

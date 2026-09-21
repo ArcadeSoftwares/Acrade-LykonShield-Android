@@ -365,8 +365,8 @@ fun HomeScreen(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        val trackersVal = if (isProtectionEnabled) ShieldStatsManager.totalBlockedTrackers.toString() else "0"
-                        val adsVal = if (isProtectionEnabled) ShieldStatsManager.totalAdsBlocked.toString() else "0"
+                        val trackersVal = if (isProtectionEnabled) ShieldStatsManager.todayBlockedTrackers.toString() else "0"
+                        val adsVal = if (isProtectionEnabled) ShieldStatsManager.todayAdsBlocked.toString() else "0"
                         val dataSavedVal = if (isProtectionEnabled) {
                             val bytes = ShieldStatsManager.totalDataSavedBytes
                             when {

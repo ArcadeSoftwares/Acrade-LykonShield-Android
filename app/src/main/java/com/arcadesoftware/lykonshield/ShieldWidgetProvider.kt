@@ -144,46 +144,15 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         // GET CATEGORY DATA
         // =========================================================
 
-        val categoryString =
-            statsPrefs.getString(
-                "category_blocks",
-                ""
-            ) ?: ""
+        val todaySdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+        val todayKeyStr = todaySdf.format(java.util.Date())
+        val appPrefs = context.getSharedPreferences("lykon_shield_prefs", Context.MODE_PRIVATE)
+        val isEnabled = appPrefs.getBoolean("protection_enabled", false)
 
-        val categoryCounts =
-            mutableMapOf<String, Int>()
+        val totalBlocks = if (isEnabled) statsPrefs.getInt("today_total_$todayKeyStr", 0) else 0
+        val adsCount = if (isEnabled) statsPrefs.getInt("today_ads_$todayKeyStr", 0) else 0
+        val trackersCount = if (isEnabled) statsPrefs.getInt("today_trackers_$todayKeyStr", 0) else 0
 
-        var totalBlocks = 0
-
-        if (categoryString.isNotEmpty()) {
-
-            categoryString
-                .split(",")
-                .forEach { entry ->
-
-                    val parts =
-                        entry.split(":")
-
-                    if (parts.size == 2) {
-
-                        val count =
-                            parts[1].toIntOrNull()
-
-                        if (count != null) {
-
-                            categoryCounts[
-                                parts[0]
-                            ] = count
-
-                            totalBlocks += count
-                        }
-                    }
-                }
-        }
-
-        val adsCount = categoryCounts["AD"] ?: 0
-        val trackersCount = categoryCounts["TRACKER"] ?: 0
-        
         val sortedCategories = listOf(
             java.util.AbstractMap.SimpleEntry("Total", totalBlocks),
             java.util.AbstractMap.SimpleEntry("Ads", adsCount),
@@ -225,7 +194,8 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             context,
             sortedCategories,
             totalBlocks,
-            76
+            64,
+            isEnabled
         )
 
         views.setImageViewBitmap(
@@ -318,7 +288,11 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                         0
                     }
 
-                val categoryColor = listOf(Color.parseColor("#FF0055"), Color.parseColor("#A3FF00"), Color.parseColor("#00E5FF")).getOrElse(i) { getColorForCategory(category.key) }
+                val categoryColor = if (isEnabled) {
+                listOf(Color.parseColor("#FF0055"), Color.parseColor("#A3FF00"), Color.parseColor("#00E5FF")).getOrElse(i) { Color.GRAY }
+            } else {
+                Color.parseColor("#808080") // Grey out
+            }
 
                 views.setViewVisibility(
                     rowLayouts[i],
@@ -502,7 +476,8 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         context: Context,
         categories: List<Map.Entry<String, Int>>,
         total: Int,
-        sizeDp: Int
+        sizeDp: Int,
+        isEnabled: Boolean
     ): Bitmap {
         val density = context.resources.displayMetrics.density
         val sizePx = (sizeDp * density).toInt().coerceAtLeast(1)
@@ -536,7 +511,11 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 (sizePx / 2f) + currentRadius
             )
             
-            val color = listOf(Color.parseColor("#FF0055"), Color.parseColor("#A3FF00"), Color.parseColor("#00E5FF")).getOrElse(i) { getColorForCategory(category.key) }
+            val color = if (isEnabled) {
+                listOf(Color.parseColor("#FF0055"), Color.parseColor("#A3FF00"), Color.parseColor("#00E5FF")).getOrElse(i) { Color.GRAY }
+            } else {
+                Color.parseColor("#808080") // Grey out
+            }
             
             // Draw background track (lightened)
             paint.color = Color.argb(40, Color.red(color), Color.green(color), Color.blue(color))
