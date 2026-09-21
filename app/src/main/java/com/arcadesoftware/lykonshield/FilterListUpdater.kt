@@ -36,12 +36,11 @@ object FilterListUpdater {
      * Download sources mapped to their local file names.
      */
     private val DOWNLOAD_MAP = mapOf(
-        AdblockEngine.FilterSources.EASYLIST_URL to "easylist.txt",
-        AdblockEngine.FilterSources.EASYPRIVACY_URL to "easyprivacy.txt",
-        AdblockEngine.FilterSources.UBLOCK_FILTERS_URL to "ublock-filters.txt",
-        AdblockEngine.FilterSources.PETER_LOWE_URL to "peter-lowe.txt",
-        AdblockEngine.FilterSources.OISD_URL to "oisd-basic.txt",
-        "https://cdn.jsdelivr.net/gh/ProjectArcade/Arcade-Lykon-Shield-list@main/ott-filters.txt" to "ott-filters.txt"
+        AdblockEngine.FilterSources.BRAVE_UNBREAK_URL to "brave-unbreak.txt",
+        AdblockEngine.FilterSources.BRAVE_SPECIFIC_URL to "brave-specific.txt",
+        AdblockEngine.FilterSources.BRAVE_SOCIAL_URL to "brave-social.txt",
+        AdblockEngine.FilterSources.BRAVE_FIRSTPARTY_URL to "brave-firstparty.txt",
+        AdblockEngine.FilterSources.BRAVE_ANDROID_SPECIFIC_URL to "brave-android-specific.txt"
     )
 
     /**

@@ -209,8 +209,23 @@ fun DeveloperScreen(
                                     checked = isAdvancedNetworkStatsEnabled,
                                     onCheckedChange = onAdvancedNetworkStatsToggle,
                                     backdrop = backdrop,
-                                    showDivider = false
+                                    showDivider = true
                                 )
+                                val context = androidx.compose.ui.platform.LocalContext.current
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            android.widget.Toast.makeText(context, "Updating filter lists in background...", android.widget.Toast.LENGTH_SHORT).show()
+                                            com.arcadesoftware.lykonshield.FilterListUpdater.checkAndUpdate(context, true)
+                                        }
+                                        .padding(16.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = "Update Filter Lists", color = contentColor, fontSize = 16.sp)
+                                    Text(text = "Force Update", color = if (isLightTheme) Color(0xFF007AFF) else Color(0xFF0A84FF), fontSize = 14.sp)
+                                }
                             }
                         }
                     }
