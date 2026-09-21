@@ -121,7 +121,7 @@ fun ContentBlockingScreen(
                 state = state,
                 modifier = Modifier
                     .fillMaxHeight()
-                    .widthIn(max = 600.dp),
+                    ,
                 contentPadding = PaddingValues(
                     top = topPadding,
                     bottom = bottomPadding + 24.dp,

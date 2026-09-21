@@ -141,7 +141,7 @@ fun BlockedScreen(
         ) {
             LazyColumn(
                 state = state,
-                modifier = Modifier.fillMaxHeight().widthIn(max = 600.dp),
+                modifier = Modifier.fillMaxHeight(),
                 contentPadding = PaddingValues(top = topPadding, bottom = bottomPadding + 24.dp, start = 16.dp, end = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
