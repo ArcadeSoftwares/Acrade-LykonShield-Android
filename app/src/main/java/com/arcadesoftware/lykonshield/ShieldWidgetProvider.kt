@@ -79,9 +79,6 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         if (!isProtectionEnabled) {
             views.setTextColor(R.id.widget_total_count, android.graphics.Color.parseColor("#8E8E93"))
             views.setTextColor(R.id.widget_total_label, android.graphics.Color.parseColor("#8E8E93"))
-        } else {
-            views.setTextColor(R.id.widget_total_count, androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary))
-            views.setTextColor(R.id.widget_total_label, androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_secondary))
         }
 
         // Draw Pie Chart
@@ -138,10 +135,6 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                     views.setTextColor(rowNames[i], android.graphics.Color.parseColor("#8E8E93"))
                     views.setTextColor(rowPercents[i], android.graphics.Color.parseColor("#8E8E93"))
                     views.setTextColor(rowCounts[i], android.graphics.Color.parseColor("#8E8E93"))
-                } else {
-                    views.setTextColor(rowNames[i], androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary))
-                    views.setTextColor(rowPercents[i], androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary))
-                    views.setTextColor(rowCounts[i], androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_secondary))
                 }
             } else {
                 views.setViewVisibility(rowLayouts[i], android.view.View.GONE)
