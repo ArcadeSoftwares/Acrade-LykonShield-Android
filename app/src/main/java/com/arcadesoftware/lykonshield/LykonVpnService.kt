@@ -402,19 +402,25 @@ class LykonVpnService : VpnService() {
 
         val protectionLevel = prefs.getString("protection_level", "TRACKER_AND_ADS") ?: "TRACKER_AND_ADS"
         val isShieldOn = isVpnActive && protectionLevel != "DISABLED"
+        val blockContentAlways = prefs.getBoolean("block_content_always", true)
 
         // ─── Content Blocking Filters (Social / Safety / Custom Websites) ───
         val blockInstagram = prefs.getBoolean("block_instagram", false)
+        val blockTikTok = prefs.getBoolean("block_tiktok", false)
         val blockAdultContent = prefs.getBoolean("block_adult_content", false)
         val customBlockedWebsites = prefs.getStringSet("custom_blocked_websites", emptySet()) ?: emptySet()
 
         var isContentBlocked = false
-        if (blockInstagram && INSTAGRAM_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
-            isContentBlocked = true
-        } else if (blockAdultContent && ADULT_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
-            isContentBlocked = true
-        } else if (customBlockedWebsites.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
-            isContentBlocked = true
+        if (isShieldOn || blockContentAlways) {
+            if (blockInstagram && INSTAGRAM_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+                isContentBlocked = true
+            } else if (blockTikTok && TIKTOK_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+                isContentBlocked = true
+            } else if (blockAdultContent && ADULT_DOMAINS.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+                isContentBlocked = true
+            } else if (customBlockedWebsites.any { lowerDomain == it || lowerDomain.endsWith(".$it") }) {
+                isContentBlocked = true
+            }
         }
 
         var shouldBlock = isContentBlocked

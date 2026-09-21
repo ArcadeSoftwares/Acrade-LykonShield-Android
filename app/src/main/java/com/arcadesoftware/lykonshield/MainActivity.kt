@@ -385,7 +385,8 @@ class MainActivity : ComponentActivity() {
                                     isProtectionEnabled = isProtectionEnabled,
                                     topPadding = 12.dp + statusBarPadding,
                                     bottomPadding = 88.dp + navBarPadding,
-                                    backdrop = backgroundBackdrop
+                                    backdrop = backgroundBackdrop,
+                                    onPopupStateChange = { isAppDetailPopupOpen = it }
                                 )
                             }
                             composable("settings") {
