@@ -33,7 +33,17 @@ class ShieldWidgetProvider : AppWidgetProvider() {
     private fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
         val statsPrefs = context.getSharedPreferences("lykon_shield_stats", Context.MODE_PRIVATE)
 
+        val defaultPrefs = context.getSharedPreferences("lykon_shield_prefs", android.content.Context.MODE_PRIVATE)
+        val isProtectionEnabled = defaultPrefs.getBoolean("protection_enabled", false)
+
         val views = RemoteViews(context.packageName, R.layout.widget_shield)
+        if (!isProtectionEnabled) {
+            views.setTextViewText(R.id.widget_title, "SHIELD OFF")
+            views.setInt(R.id.widget_logo, "setColorFilter", android.graphics.Color.parseColor("#8E8E93"))
+        } else {
+            views.setTextViewText(R.id.widget_title, "LYKON SHIELD")
+            views.setInt(R.id.widget_logo, "setColorFilter", android.graphics.Color.parseColor("#34C759"))
+        }
 
         // Extract today's blocks
         val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
@@ -84,7 +94,16 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 displayCategories.add(java.util.AbstractMap.SimpleEntry("Extra", extraCount))
             }
         }
-        val bitmap = createCategoriesPieChartBitmap(context, displayCategories, totalBlocks)
+        
+        if (displayCategories.isEmpty()) {
+            displayCategories.add(java.util.AbstractMap.SimpleEntry("Tracker", 0))
+            displayCategories.add(java.util.AbstractMap.SimpleEntry("Ad", 0))
+            displayCategories.add(java.util.AbstractMap.SimpleEntry("Analytics", 0))
+            displayCategories.add(java.util.AbstractMap.SimpleEntry("Malware", 0))
+            displayCategories.add(java.util.AbstractMap.SimpleEntry("Social", 0))
+        }
+
+        val bitmap = createCategoriesPieChartBitmap(context, displayCategories, totalBlocks, isProtectionEnabled)
         views.setImageViewBitmap(R.id.widget_pie_chart, bitmap)
 
         // Setup Legend Rows
@@ -94,28 +113,31 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val rowPercents = listOf(R.id.row_0_percent, R.id.row_1_percent, R.id.row_2_percent, R.id.row_3_percent, R.id.row_4_percent, R.id.row_5_percent)
         val rowCounts = listOf(R.id.row_0_count, R.id.row_1_count, R.id.row_2_count, R.id.row_3_count, R.id.row_4_count, R.id.row_5_count)
         
-        if (displayCategories.isEmpty()) {
-            for (id in rowLayouts) {
-                views.setViewVisibility(id, android.view.View.GONE)
-            }
-            views.setViewVisibility(R.id.widget_empty_text, android.view.View.VISIBLE)
-        } else {
-            views.setViewVisibility(R.id.widget_empty_text, android.view.View.GONE)
-            for (i in 0 until 6) {
-                if (i < displayCategories.size) {
-                    val cat = displayCategories[i]
-                    val catName = cat.key.lowercase().replaceFirstChar { it.uppercase() }
-                    val percent = if (totalBlocks > 0) ((cat.value.toFloat() / totalBlocks) * 100).toInt() else 0
-                    val color = getColorForCategory(cat.key)
+        views.setViewVisibility(R.id.widget_empty_text, android.view.View.GONE)
+        for (i in 0 until 6) {
+            if (i < displayCategories.size) {
+                val cat = displayCategories[i]
+                val catName = cat.key.lowercase().replaceFirstChar { it.uppercase() }
+                val percent = if (totalBlocks > 0) ((cat.value.toFloat() / totalBlocks) * 100).toInt() else 0
+                val color = if (isProtectionEnabled) getColorForCategory(cat.key) else android.graphics.Color.parseColor("#8E8E93")
 
-                    views.setViewVisibility(rowLayouts[i], android.view.View.VISIBLE)
-                    views.setImageViewBitmap(rowDots[i], createDotBitmap(color))
-                    views.setTextViewText(rowNames[i], catName)
-                    views.setTextViewText(rowPercents[i], "$percent%")
-                    views.setTextViewText(rowCounts[i], "(${cat.value})")
+                views.setViewVisibility(rowLayouts[i], android.view.View.VISIBLE)
+                views.setImageViewBitmap(rowDots[i], createDotBitmap(color))
+                views.setTextViewText(rowNames[i], catName)
+                views.setTextViewText(rowPercents[i], "$percent%")
+                views.setTextViewText(rowCounts[i], "(${cat.value})")
+                
+                if (!isProtectionEnabled) {
+                    views.setTextColor(rowNames[i], android.graphics.Color.parseColor("#8E8E93"))
+                    views.setTextColor(rowPercents[i], android.graphics.Color.parseColor("#8E8E93"))
+                    views.setTextColor(rowCounts[i], android.graphics.Color.parseColor("#8E8E93"))
                 } else {
-                    views.setViewVisibility(rowLayouts[i], android.view.View.GONE)
+                    views.setTextColor(rowNames[i], androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary))
+                    views.setTextColor(rowPercents[i], androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary))
+                    views.setTextColor(rowCounts[i], androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_secondary))
                 }
+            } else {
+                views.setViewVisibility(rowLayouts[i], android.view.View.GONE)
             }
         }
 
@@ -161,7 +183,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         return bitmap
     }
 
-    private fun createCategoriesPieChartBitmap(context: Context, categories: List<Map.Entry<String, Int>>, total: Int): Bitmap {
+    private fun createCategoriesPieChartBitmap(context: Context, categories: List<Map.Entry<String, Int>>, total: Int, isProtectionEnabled: Boolean): Bitmap {
         val size = 260
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -173,7 +195,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         
         val rect = RectF(20f, 20f, size - 20f, size - 20f)
         
-        if (total == 0 || categories.isEmpty()) {
+        if (total == 0 || categories.isEmpty() || !isProtectionEnabled) {
             paint.color = androidx.core.content.ContextCompat.getColor(context, R.color.widget_track_empty)
             canvas.drawArc(rect, 0f, 360f, false, paint)
             return bitmap
