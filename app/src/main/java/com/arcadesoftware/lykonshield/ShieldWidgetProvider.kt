@@ -157,7 +157,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
-            strokeWidth = 36f
+            strokeWidth = 26f
             strokeCap = Paint.Cap.BUTT
         }
         
