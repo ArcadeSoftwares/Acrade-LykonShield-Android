@@ -37,13 +37,6 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val isProtectionEnabled = defaultPrefs.getBoolean("protection_enabled", false)
 
         val views = RemoteViews(context.packageName, R.layout.widget_shield)
-        if (!isProtectionEnabled) {
-            views.setTextViewText(R.id.widget_title, "SHIELD OFF")
-            views.setInt(R.id.widget_logo, "setColorFilter", android.graphics.Color.parseColor("#8E8E93"))
-        } else {
-            views.setTextViewText(R.id.widget_title, "LYKON SHIELD")
-            views.setInt(R.id.widget_logo, "setColorFilter", android.graphics.Color.parseColor("#34C759"))
-        }
 
         // Extract today's blocks
         val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
@@ -95,14 +88,6 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             }
         }
         
-        if (displayCategories.isEmpty()) {
-            displayCategories.add(java.util.AbstractMap.SimpleEntry("Tracker", 0))
-            displayCategories.add(java.util.AbstractMap.SimpleEntry("Ad", 0))
-            displayCategories.add(java.util.AbstractMap.SimpleEntry("Analytics", 0))
-            displayCategories.add(java.util.AbstractMap.SimpleEntry("Malware", 0))
-            displayCategories.add(java.util.AbstractMap.SimpleEntry("Social", 0))
-        }
-
         val bitmap = createCategoriesPieChartBitmap(context, displayCategories, totalBlocks, isProtectionEnabled)
         views.setImageViewBitmap(R.id.widget_pie_chart, bitmap)
 
@@ -113,7 +98,24 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         val rowPercents = listOf(R.id.row_0_percent, R.id.row_1_percent, R.id.row_2_percent, R.id.row_3_percent, R.id.row_4_percent, R.id.row_5_percent)
         val rowCounts = listOf(R.id.row_0_count, R.id.row_1_count, R.id.row_2_count, R.id.row_3_count, R.id.row_4_count, R.id.row_5_count)
         
-        views.setViewVisibility(R.id.widget_empty_text, android.view.View.GONE)
+        if (displayCategories.isEmpty()) {
+            views.setViewVisibility(R.id.widget_empty_state, android.view.View.VISIBLE)
+            views.setViewVisibility(R.id.widget_content, android.view.View.GONE)
+            
+            // Fix light theme issue (white icon on white background)
+            val primaryColor = androidx.core.content.ContextCompat.getColor(context, R.color.widget_text_primary)
+            val iconColor = if (isProtectionEnabled) primaryColor else android.graphics.Color.parseColor("#8E8E93")
+            views.setInt(R.id.widget_empty_logo, "setColorFilter", iconColor)
+            
+            if (!isProtectionEnabled) {
+                views.setTextColor(R.id.widget_empty_text, android.graphics.Color.parseColor("#8E8E93"))
+            } else {
+                views.setTextColor(R.id.widget_empty_text, primaryColor)
+            }
+        } else {
+            views.setViewVisibility(R.id.widget_empty_state, android.view.View.GONE)
+            views.setViewVisibility(R.id.widget_content, android.view.View.VISIBLE)
+
         for (i in 0 until 6) {
             if (i < displayCategories.size) {
                 val cat = displayCategories[i]
@@ -139,6 +141,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             } else {
                 views.setViewVisibility(rowLayouts[i], android.view.View.GONE)
             }
+        }
         }
 
         // Open app when clicking background

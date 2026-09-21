@@ -1,101 +1,86 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@drawable/widget_bg_inspired"
-    android:padding="10dp">
+    android:paddingStart="24dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
-    <!-- Header -->
+    <!-- Empty State -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/widget_empty_state"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="4dp">
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
         <ImageView
-            android:id="@+id/widget_logo"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
+            android:id="@+id/widget_empty_logo"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_tile_shield"
-            android:layout_marginEnd="6dp" />
+            android:layout_marginBottom="4dp" />
         <TextView
-            android:id="@+id/widget_title"
+            android:id="@+id/widget_empty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="LYKON SHIELD"
-            android:textColor="@color/widget_text_secondary"
-            android:textSize="10sp"
+            android:text="😊 Nothing to block"
+            android:textColor="@color/widget_text_primary"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium" />
     </LinearLayout>
 
     <!-- Content (Chart + Legend) -->
     <LinearLayout
+        android:id="@+id/widget_content"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-    <!-- Pie Chart Area -->
-    <RelativeLayout
-        android:layout_width="65dp"
-        android:layout_height="65dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginStart="4dp">
-
-        <ImageView
-            android:id="@+id/widget_pie_chart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <TextView
-                android:id="@+id/widget_total_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/widget_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
-
-            <TextView
-                android:id="@+id/widget_total_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Today"
-                android:textColor="@color/widget_text_secondary"
-                android:textSize="8sp"
-                android:fontFamily="sans-serif"
-                android:layout_marginTop="-2dp" />
-        </LinearLayout>
-    </RelativeLayout>
-
-    <!-- Legend List -->
-    <LinearLayout
-        android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/widget_empty_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="No blocks yet"
-            android:textColor="@color/widget_text_secondary"
-            android:textSize="12sp"
-            android:gravity="center"
-            android:visibility="gone" />
+        <!-- Pie Chart Area -->
+        <RelativeLayout
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            android:layout_marginEnd="12dp">
+
+            <ImageView
+                android:id="@+id/widget_pie_chart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/widget_total_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/widget_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium" />
+
+                <TextView
+                    android:id="@+id/widget_total_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Today"
+                    android:textColor="@color/widget_text_secondary"
+                    android:textSize="8sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:textAllCaps="true" />
+            </LinearLayout>
+        </RelativeLayout>
 
         <!-- Left Column -->
         <LinearLayout
@@ -162,5 +147,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
-</LinearLayout>
+</FrameLayout>
