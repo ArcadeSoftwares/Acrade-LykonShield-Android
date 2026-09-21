@@ -12,13 +12,7 @@
     android:background="@drawable/widget_bg_inspired">
 
     
-    <!-- APP ICON -->
-    <ImageView
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginEnd="20dp"
-        android:src="@mipmap/ic_launcher"
-        android:scaleType="fitCenter" />
+    
 
     <!-- LEFT: 3 Rows -->
     <LinearLayout
@@ -38,15 +32,15 @@
             android:layout_marginBottom="8dp">
             <ImageView
                 android:id="@+id/row_0_dot"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:layout_marginEnd="10dp"/>
             <TextView
                 android:id="@+id/row_0_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false"/>
             <TextView
@@ -54,7 +48,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:layout_marginStart="6dp"
                 android:includeFontPadding="false"/>
         </LinearLayout>
@@ -69,15 +63,15 @@
             android:layout_marginBottom="8dp">
             <ImageView
                 android:id="@+id/row_1_dot"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:layout_marginEnd="10dp"/>
             <TextView
                 android:id="@+id/row_1_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false"/>
             <TextView
@@ -85,7 +79,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:layout_marginStart="6dp"
                 android:includeFontPadding="false"/>
         </LinearLayout>
@@ -99,15 +93,15 @@
             android:orientation="horizontal">
             <ImageView
                 android:id="@+id/row_2_dot"
-                android:layout_width="12dp"
-                android:layout_height="12dp"
+                android:layout_width="14dp"
+                android:layout_height="14dp"
                 android:layout_marginEnd="10dp"/>
             <TextView
                 android:id="@+id/row_2_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_primary"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false"/>
             <TextView
@@ -115,7 +109,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/widget_text_secondary"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 android:layout_marginStart="6dp"
                 android:includeFontPadding="false"/>
         </LinearLayout>
@@ -126,16 +120,16 @@
             android:layout_height="wrap_content"
             android:text="No blocks yet"
             android:textColor="@color/widget_text_secondary"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:visibility="gone"/>
     </LinearLayout>
 
     <!-- RIGHT: Chart - Scaled down to prevent clipping -->
     <ImageView
         android:id="@+id/widget_pie_chart"
-        android:layout_width="68dp"
-        android:layout_height="68dp"
-        android:layout_marginStart="12dp"
+        android:layout_width="76dp"
+        android:layout_height="76dp"
+        android:layout_marginStart="14dp"
         android:scaleType="centerInside"
         android:contentDescription="Blocked categories"/>
 </LinearLayout>

@@ -225,7 +225,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
             context,
             sortedCategories,
             totalBlocks,
-            68
+            76
         )
 
         views.setImageViewBitmap(
@@ -318,7 +318,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                         0
                     }
 
-                val categoryColor = listOf(Color.parseColor("#FF5F56"), Color.parseColor("#FFBD2E"), Color.parseColor("#27C93F")).getOrElse(i) { getColorForCategory(category.key) }
+                val categoryColor = listOf(Color.parseColor("#FF0055"), Color.parseColor("#A3FF00"), Color.parseColor("#00E5FF")).getOrElse(i) { getColorForCategory(category.key) }
 
                 views.setViewVisibility(
                     rowLayouts[i],
@@ -536,16 +536,20 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 (sizePx / 2f) + currentRadius
             )
             
-            val color = listOf(Color.parseColor("#FF5F56"), Color.parseColor("#FFBD2E"), Color.parseColor("#27C93F")).getOrElse(i) { getColorForCategory(category.key) }
+            val color = listOf(Color.parseColor("#FF0055"), Color.parseColor("#A3FF00"), Color.parseColor("#00E5FF")).getOrElse(i) { getColorForCategory(category.key) }
             
             // Draw background track (lightened)
-            paint.color = Color.argb(64, Color.red(color), Color.green(color), Color.blue(color))
+            paint.color = Color.argb(40, Color.red(color), Color.green(color), Color.blue(color))
             canvas.drawArc(rect, 0f, 360f, false, paint)
             
             // Draw foreground progress
             val sweep = if (category.value >= total && total > 0) 360f else (category.value / maxVal) * 340f + 5f
             paint.color = color
+            // Add a vibrant neon glow
+            paint.setShadowLayer(8f, 0f, 0f, Color.argb(180, Color.red(color), Color.green(color), Color.blue(color)))
             canvas.drawArc(rect, -90f, sweep.coerceAtMost(360f), false, paint)
+            // Clear shadow for next track
+            paint.clearShadowLayer()
             
             currentRadius -= (strokeWidth + gap)
         }
