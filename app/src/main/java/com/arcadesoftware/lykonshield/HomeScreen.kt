@@ -296,6 +296,10 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        ShieldStatsManager.checkDayRollover()
+    }
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
         LazyColumn(
             state = state,

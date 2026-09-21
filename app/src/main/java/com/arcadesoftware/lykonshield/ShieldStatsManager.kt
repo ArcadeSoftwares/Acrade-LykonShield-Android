@@ -47,10 +47,25 @@ object ShieldStatsManager {
     private var prefs: SharedPreferences? = null
     private var saveTaskPending = false
     private var lastContext: Context? = null
+    private var currentDayKey: String = ""
     
     private val saveRunnable = Runnable {
         saveTaskPending = false
         lastContext?.let { performPersist(it) }
+    }
+
+    fun checkDayRollover() {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+        val todayDayKey = sdf.format(java.util.Date())
+        if (currentDayKey != "" && currentDayKey != todayDayKey) {
+            currentDayKey = todayDayKey
+            todayBlockedTrackers = 0
+            todayAdsBlocked = 0
+            todayTotalBlocks = 0
+            // We should also clear or reset today-specific lists if needed, but counts are primary.
+        } else if (currentDayKey == "") {
+            currentDayKey = todayDayKey
+        }
     }
 
     // ── Block category classification ────────────────────────────────────────
@@ -222,6 +237,7 @@ object ShieldStatsManager {
             mainHandler.post {
                 val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
                 val dayKey = sdf.format(java.util.Date())
+                currentDayKey = dayKey
                 todayBlockedTrackers = p.getInt("today_trackers_$dayKey", 0)
                 todayAdsBlocked = p.getInt("today_ads_$dayKey", 0)
                 todayTotalBlocks = p.getInt("today_total_$dayKey", 0)
@@ -284,6 +300,14 @@ object ShieldStatsManager {
                             }
                         }
                     }
+                }
+
+                // Fix mismatch if dailyBlockHistory has more blocks than todayTotalBlocks
+                val recordedDaily = dailyBlockHistory[dayKey] ?: 0
+                if (recordedDaily > todayTotalBlocks) {
+                    val diff = recordedDaily - todayTotalBlocks
+                    todayTotalBlocks = recordedDaily
+                    todayBlockedTrackers += diff
                 }
 
                 // Restore category block counts
@@ -443,6 +467,8 @@ object ShieldStatsManager {
         val appName = getAppName(context, packageName)
 
         mainHandler.post {
+            checkDayRollover()
+
             // ── Counters ─────────────────────────────────────────────────
             val todaySdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
             val todayDayKey = todaySdf.format(java.util.Date())

@@ -132,6 +132,10 @@ fun BlockedScreen(
 
     val dialogBackdrop = rememberLayerBackdrop()
 
+    LaunchedEffect(Unit) {
+        ShieldStatsManager.checkDayRollover()
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
