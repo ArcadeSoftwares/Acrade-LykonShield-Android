@@ -47,12 +47,19 @@ object AdblockEngine {
         const val BRAVE_FIRSTPARTY_URL = "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-firstparty.txt"
         const val BRAVE_ANDROID_SPECIFIC_URL = "https://raw.githubusercontent.com/brave/adblock-lists/master/brave-lists/brave-android-specific.txt"
         const val ADGUARD_MOBILE_URL = "https://filters.adtidy.org/extension/chromium/filters/11.txt"
+        const val EASYLIST_URL = "https://raw.githubusercontent.com/ArcadeSoftwares/Acrade-LykonShield-list/main/easylist.txt"
+        const val EASYPRIVACY_URL = "https://raw.githubusercontent.com/ArcadeSoftwares/Acrade-LykonShield-list/main/easyprivacy.txt"
+        const val MALWARE_URL = "https://raw.githubusercontent.com/ArcadeSoftwares/Acrade-LykonShield-list/main/malware.txt"
+        const val UBLOCK_FILTERS_URL = "https://raw.githubusercontent.com/ArcadeSoftwares/Acrade-LykonShield-list/main/ublock-filters.txt"
+        const val PETER_LOWE_URL = "https://pgl.yoyo.org/adservers/serverlist.php?hostformat=adblockplus&showintro=0"
+        const val OISD_URL = "https://abp.oisd.nl/basic/"
+        const val OTT_FILTERS_URL = "https://cdn.jsdelivr.net/gh/ProjectArcade/Arcade-Lykon-Shield-list@main/ott-filters.txt"
     }
 
     // ── Filter file names (used in both assets and internal storage) ─────
 
-    private val FILTER_FILES = listOf("brave-unbreak.txt", "brave-specific.txt", "brave-social.txt", "brave-firstparty.txt", "brave-android-specific.txt", "adguard-mobile.txt")
-    private val EXTRA_FILTER_FILES = listOf("custom-blocklist.txt")
+    private val FILTER_FILES = listOf("brave-unbreak.txt", "brave-specific.txt", "brave-social.txt", "brave-firstparty.txt", "brave-android-specific.txt", "adguard-mobile.txt", "easylist.txt", "easyprivacy.txt", "malware.txt", "ublock-filters.txt", "ott-filters.txt")
+    private val EXTRA_FILTER_FILES = listOf("custom-blocklist.txt", "peter-lowe.txt", "oisd-basic.txt")
     const val FILTERS_DIR = "filters"
 
     // --- Engine State ---
@@ -336,7 +343,8 @@ object AdblockEngine {
         
         var allFiles = FILTER_FILES + EXTRA_FILTER_FILES
         if (level == "TRACKER_ONLY") {
-            Log.d(TAG, "TRACKER_ONLY mode active")
+            allFiles = allFiles.filter { it != "easylist.txt" && it != "peter-lowe.txt" }
+            Log.d(TAG, "TRACKER_ONLY mode: excluding easylist.txt and peter-lowe.txt")
         }
 
         for (file in allFiles) {
@@ -360,6 +368,9 @@ object AdblockEngine {
         val level = prefs.getString("protection_level", "TRACKER_AND_ADS") ?: "TRACKER_AND_ADS"
         
         var allFiles = FILTER_FILES + EXTRA_FILTER_FILES
+        if (level == "TRACKER_ONLY") {
+            allFiles = allFiles.filter { it != "easylist.txt" && it != "peter-lowe.txt" }
+        }
 
         val filters = mutableListOf<String>()
         for (file in allFiles) {

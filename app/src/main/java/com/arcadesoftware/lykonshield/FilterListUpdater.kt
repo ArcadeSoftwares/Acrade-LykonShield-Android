@@ -41,7 +41,14 @@ object FilterListUpdater {
         AdblockEngine.FilterSources.BRAVE_SOCIAL_URL to "brave-social.txt",
         AdblockEngine.FilterSources.BRAVE_FIRSTPARTY_URL to "brave-firstparty.txt",
         AdblockEngine.FilterSources.BRAVE_ANDROID_SPECIFIC_URL to "brave-android-specific.txt",
-        AdblockEngine.FilterSources.ADGUARD_MOBILE_URL to "adguard-mobile.txt"
+        AdblockEngine.FilterSources.ADGUARD_MOBILE_URL to "adguard-mobile.txt",
+        AdblockEngine.FilterSources.EASYLIST_URL to "easylist.txt",
+        AdblockEngine.FilterSources.EASYPRIVACY_URL to "easyprivacy.txt",
+        AdblockEngine.FilterSources.MALWARE_URL to "malware.txt",
+        AdblockEngine.FilterSources.UBLOCK_FILTERS_URL to "ublock-filters.txt",
+        AdblockEngine.FilterSources.PETER_LOWE_URL to "peter-lowe.txt",
+        AdblockEngine.FilterSources.OISD_URL to "oisd-basic.txt",
+        AdblockEngine.FilterSources.OTT_FILTERS_URL to "ott-filters.txt"
     )
 
     /**

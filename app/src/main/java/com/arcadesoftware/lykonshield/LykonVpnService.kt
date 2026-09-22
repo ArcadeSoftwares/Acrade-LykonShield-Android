@@ -519,7 +519,7 @@ class LykonVpnService : VpnService() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("$appName might be restricted")
             .setContentText("Decrease tracking protection. This app might not work properly in Enhanced Mode.")
-            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setSmallIcon(R.drawable.dark_icon)
             .setAutoCancel(true)
             .build()
 
@@ -872,7 +872,7 @@ class LykonVpnService : VpnService() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Lykon Shield Active")
             .setContentText("Blocking ads, trackers, and DNS bypass attempts")
-            .setSmallIcon(android.R.drawable.ic_lock_lock)
+            .setSmallIcon(R.drawable.dark_icon)
             .setOngoing(true)
             .build()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
