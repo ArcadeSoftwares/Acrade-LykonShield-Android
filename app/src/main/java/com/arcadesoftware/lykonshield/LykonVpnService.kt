@@ -95,9 +95,33 @@ class LykonVpnService : VpnService() {
     private var dnsExecutor: ExecutorService? = null
     private val outputLock = Any()
 
+    // Cached preferences
+    private var cachedExcludedApps: Set<String> = emptySet()
+    private var cachedCustomAllowedDomains: Set<String> = emptySet()
+    private var cachedProtectionLevel: String = "TRACKER_AND_ADS"
+    private var cachedBlockContentAlways: Boolean = true
+    private var cachedBlockAdultContent: Boolean = false
+    private var cachedCustomBlockedWebsites: Set<String> = emptySet()
+    private var prefsListener: android.content.SharedPreferences.OnSharedPreferenceChangeListener? = null
+
     override fun onCreate() {
         super.onCreate()
-        dnsExecutor = Executors.newCachedThreadPool()
+        dnsExecutor = Executors.newFixedThreadPool(4)
+        
+        val prefs = applicationContext.getSharedPreferences("lykon_shield_prefs", Context.MODE_PRIVATE)
+        
+        fun updateCachedPrefs() {
+            cachedExcludedApps = prefs.getStringSet("excluded_apps", emptySet())?.toSet() ?: emptySet()
+            cachedCustomAllowedDomains = prefs.getStringSet("custom_allowed_domains", emptySet())?.toSet() ?: emptySet()
+            cachedProtectionLevel = prefs.getString("protection_level", "TRACKER_AND_ADS") ?: "TRACKER_AND_ADS"
+            cachedBlockContentAlways = prefs.getBoolean("block_content_always", true)
+            cachedBlockAdultContent = prefs.getBoolean("block_adult_content", false)
+            cachedCustomBlockedWebsites = prefs.getStringSet("custom_blocked_websites", emptySet())?.toSet() ?: emptySet()
+        }
+        updateCachedPrefs()
+        
+        prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, _ -> updateCachedPrefs() }
+        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -293,6 +317,7 @@ class LykonVpnService : VpnService() {
         } catch (e: Exception) {
             if (isRunning) Log.e(TAG, "Error in VPN Loop", e)
         } finally {
+            isVpnActive = false
             inputStream.close()
             outputStream.close()
         }

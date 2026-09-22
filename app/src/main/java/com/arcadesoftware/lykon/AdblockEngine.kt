@@ -88,10 +88,10 @@ object AdblockEngine {
     // --- Domain Blocker (Primary - Fast) ---
 
     @Volatile
-    private var blockedDomainHashes = LongArray(0)
+    private var blockedDomains = HashSet<String>()
 
     @Volatile
-    private var allowedDomainHashes = LongArray(0)
+    private var allowedDomains = HashSet<String>()
 
     private val loadedRuleCount = AtomicInteger(0)
 
@@ -168,15 +168,15 @@ object AdblockEngine {
                 
                 val cacheLoaded = loadCache(context, tempBlocked, tempAllowed)
                 if (cacheLoaded) {
-                    blockedDomainHashes = tempBlocked.map { fnv1a64(it) }.toLongArray()
-                    blockedDomainHashes.sort()
-                    allowedDomainHashes = tempAllowed.map { fnv1a64(it) }.toLongArray()
-                    allowedDomainHashes.sort()
+                    blockedDomains = tempBlocked
+                    
+                    allowedDomains = tempAllowed
+                    
                     
                     domainBlockerReady = true
                     val domainLoadTime = System.currentTimeMillis() - startTime
-                    Log.d(TAG, "Domain blocker ready (loaded from cache) in ${domainLoadTime}ms: ${blockedDomainHashes.size} domains, " +
-                            "${allowedDomainHashes.size} allowlisted, ${dohProviderDomains.size} DoH providers blocked")
+                    Log.d(TAG, "Domain blocker ready (loaded from cache) in ${domainLoadTime}ms: ${blockedDomains.size} domains, " +
+                            "${allowedDomains.size} allowlisted, ${dohProviderDomains.size} DoH providers blocked")
                     state = EngineState.READY
                     observableState.value = EngineState.READY
                     readyLatch.countDown()
@@ -184,14 +184,14 @@ object AdblockEngine {
                     loadAllFilters(context, tempBlocked, tempAllowed)
                     domainBlockerReady = true
 
-                    blockedDomainHashes = tempBlocked.map { fnv1a64(it) }.toLongArray()
-                    blockedDomainHashes.sort()
-                    allowedDomainHashes = tempAllowed.map { fnv1a64(it) }.toLongArray()
-                    allowedDomainHashes.sort()
+                    blockedDomains = tempBlocked
+                    
+                    allowedDomains = tempAllowed
+                    
 
                     val domainLoadTime = System.currentTimeMillis() - startTime
-                    Log.d(TAG, "Domain blocker ready (parsed from text) in ${domainLoadTime}ms: ${blockedDomainHashes.size} domains, " +
-                            "${allowedDomainHashes.size} allowlisted, ${dohProviderDomains.size} DoH providers blocked")
+                    Log.d(TAG, "Domain blocker ready (parsed from text) in ${domainLoadTime}ms: ${blockedDomains.size} domains, " +
+                            "${allowedDomains.size} allowlisted, ${dohProviderDomains.size} DoH providers blocked")
                     state = EngineState.READY
                     observableState.value = EngineState.READY
                     readyLatch.countDown()
@@ -221,25 +221,20 @@ object AdblockEngine {
         Log.d(TAG, "Reloading filter lists...")
         val startTime = System.currentTimeMillis()
 
-        blockedDomainHashes = LongArray(0)
-        allowedDomainHashes = LongArray(0)
-        loadedRuleCount.set(0)
-
         val tempBlocked = HashSet<String>()
         val tempAllowed = HashSet<String>()
 
         loadAllFilters(context, tempBlocked, tempAllowed)
         
-        blockedDomainHashes = tempBlocked.map { fnv1a64(it) }.toLongArray()
-        blockedDomainHashes.sort()
-        allowedDomainHashes = tempAllowed.map { fnv1a64(it) }.toLongArray()
-        allowedDomainHashes.sort()
+        blockedDomains = tempBlocked
+        allowedDomains = tempAllowed
+        loadedRuleCount.set(tempBlocked.size)
         
         saveCache(context, tempBlocked, tempAllowed)
 
         val elapsed = System.currentTimeMillis() - startTime
-        Log.d(TAG, "Filter reload complete in ${elapsed}ms: ${blockedDomainHashes.size} domains, " +
-                "${allowedDomainHashes.size} allowlisted")
+        Log.d(TAG, "Filter reload complete in ${elapsed}ms: ${blockedDomains.size} domains, " +
+                "${allowedDomains.size} allowlisted")
 
         if (nativeReady) {
             try {
@@ -256,7 +251,7 @@ object AdblockEngine {
     fun isReady(): Boolean = state == EngineState.READY
     fun isNativeReady(): Boolean = nativeReady
     fun getState(): EngineState = state
-    fun getLoadedDomainCount(): Int = blockedDomainHashes.size
+    fun getLoadedDomainCount(): Int = blockedDomains.size
     fun getLoadedRuleCount(): Int = loadedRuleCount.get()
 
     fun awaitReady(timeoutMs: Long = 5000): Boolean {
@@ -273,7 +268,7 @@ object AdblockEngine {
 
         if (isInDomainSet(domain, systemAllowlist)) return false
         if (isInDomainSet(domain, dohProviderDomains)) return true
-        if (isInDomainSet(domain, allowedDomainHashes)) return false
+        if (isInDomainSet(domain, allowedDomains)) return false
 
         if (domainBlockerReady && isDomainBlocked(domain)) return true
 
@@ -293,7 +288,7 @@ object AdblockEngine {
         val lower = domain.lowercase()
         val inSystem = isInDomainSet(lower, systemAllowlist)
         val inDoh = isInDomainSet(lower, dohProviderDomains)
-        val inAllowed = isInDomainSet(lower, allowedDomainHashes)
+        val inAllowed = isInDomainSet(lower, allowedDomains)
         val inBlocked = isDomainBlocked(lower)
         Log.d(TAG, "Checking domain: $lower -> system=$inSystem, doh=$inDoh, allowed=$inAllowed, blocked=$inBlocked")
 
@@ -439,8 +434,7 @@ object AdblockEngine {
     private fun isDomainBlocked(domain: String): Boolean {
         var current = domain.lowercase()
         while (current.isNotEmpty()) {
-            val hash = fnv1a64(current)
-            if (java.util.Arrays.binarySearch(blockedDomainHashes, hash) >= 0) return true
+            if (blockedDomains.contains(current)) return true
             val dotIndex = current.indexOf('.')
             if (dotIndex == -1) break
             current = current.substring(dotIndex + 1)
