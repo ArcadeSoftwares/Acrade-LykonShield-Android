@@ -123,7 +123,7 @@ class ShieldWidgetProvider : AppWidgetProvider() {
                 val cat = displayCategories[i]
                 val catName = cat.key.lowercase().replaceFirstChar { it.uppercase() }
                 val percent = if (totalBlocks > 0) ((cat.value.toFloat() / totalBlocks) * 100).toInt() else 0
-                val color = if (isProtectionEnabled) getColorForCategory(cat.key) else android.graphics.Color.parseColor("#8E8E93")
+                val color = if (isProtectionEnabled) getColorForCategory(context, cat.key) else android.graphics.Color.parseColor("#8E8E93")
 
                 views.setViewVisibility(rowLayouts[i], android.view.View.VISIBLE)
                 views.setImageViewBitmap(rowDots[i], createDotBitmap(color))
@@ -153,20 +153,116 @@ class ShieldWidgetProvider : AppWidgetProvider() {
         appWidgetManager.updateAppWidget(appWidgetId, views)
     }
 
-    private fun getColorForCategory(cat: String): Int {
-        return when(cat.uppercase()) {
-            "AD" -> Color.parseColor("#FF3B30")
-            "TRACKER" -> Color.parseColor("#FF9500")
-            "ANALYTICS" -> Color.parseColor("#007AFF")
-            "MALWARE" -> Color.parseColor("#AF52DE")
-            "TELEMETRY" -> Color.parseColor("#30D5C8")
-            "SOCIAL" -> Color.parseColor("#FF2D55")
-            "OTT" -> Color.parseColor("#00C7BE")
-            "DOH" -> Color.parseColor("#5856D6")
-            "MINER" -> Color.parseColor("#8E8E93")
-            "SPAM" -> Color.parseColor("#BF5AF2")
-            "OTHER" -> Color.parseColor("#34C759")
-            else -> Color.parseColor("#34C759")
+        private fun getColorForCategory(context: Context, cat: String): Int {
+        val prefs = context.getSharedPreferences("lykon_shield_prefs", Context.MODE_PRIVATE)
+        val palette = prefs.getString("widget_palette", "golden")
+        
+        return when(palette) {
+            "golden" -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#ffd52e")
+                    "TRACKER" -> Color.parseColor("#ffdc5a")
+                    "ANALYTICS" -> Color.parseColor("#ffe27e")
+                    "SOCIAL" -> Color.parseColor("#ffe99f")
+                    "TELEMETRY" -> Color.parseColor("#fff0bf")
+                    "MALWARE" -> Color.parseColor("#fff8df")
+                    "OTT" -> Color.parseColor("#fbc02d")
+                    "DOH" -> Color.parseColor("#f9a825")
+                    "MINER" -> Color.parseColor("#f57f17")
+                    "SPAM" -> Color.parseColor("#ffb300")
+                    else -> Color.parseColor("#ff8f00")
+                }
+            }
+            "fire" -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#f5ff25")
+                    "TRACKER" -> Color.parseColor("#f6cf23")
+                    "ANALYTICS" -> Color.parseColor("#f89f21")
+                    "SOCIAL" -> Color.parseColor("#f96f20")
+                    "TELEMETRY" -> Color.parseColor("#fb3f1e")
+                    "MALWARE" -> Color.parseColor("#fc0e1c")
+                    "OTT" -> Color.parseColor("#e65100")
+                    "DOH" -> Color.parseColor("#bf360c")
+                    "MINER" -> Color.parseColor("#d50000")
+                    "SPAM" -> Color.parseColor("#b71c1c")
+                    else -> Color.parseColor("#ffab00")
+                }
+            }
+            "rainbow" -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#ff0000")
+                    "TRACKER" -> Color.parseColor("#ffaa00")
+                    "ANALYTICS" -> Color.parseColor("#ffff00")
+                    "SOCIAL" -> Color.parseColor("#00ff00")
+                    "TELEMETRY" -> Color.parseColor("#014eff")
+                    "MALWARE" -> Color.parseColor("#a400ff")
+                    "OTT" -> Color.parseColor("#ff5555")
+                    "DOH" -> Color.parseColor("#ffcc55")
+                    "MINER" -> Color.parseColor("#55ff55")
+                    "SPAM" -> Color.parseColor("#5588ff")
+                    else -> Color.parseColor("#cc55ff")
+                }
+            }
+            "monochrome" -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#e1e4e8")
+                    "TRACKER" -> Color.parseColor("#bac0c6")
+                    "ANALYTICS" -> Color.parseColor("#939ca3")
+                    "SOCIAL" -> Color.parseColor("#646f77")
+                    "TELEMETRY" -> Color.parseColor("#33383e")
+                    "MALWARE" -> Color.parseColor("#010105")
+                    "OTT" -> Color.parseColor("#cfd8dc")
+                    "DOH" -> Color.parseColor("#b0bec5")
+                    "MINER" -> Color.parseColor("#78909c")
+                    "SPAM" -> Color.parseColor("#546e7a")
+                    else -> Color.parseColor("#455a64")
+                }
+            }
+            "light_chromatic" -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#fffff7")
+                    "TRACKER" -> Color.parseColor("#fbfbeb")
+                    "ANALYTICS" -> Color.parseColor("#e2e2d4")
+                    "SOCIAL" -> Color.parseColor("#c9c9bc")
+                    "TELEMETRY" -> Color.parseColor("#b5b5a9")
+                    "MALWARE" -> Color.parseColor("#a3a398")
+                    "OTT" -> Color.parseColor("#f2f2e4")
+                    "DOH" -> Color.parseColor("#ababa0")
+                    "MINER" -> Color.parseColor("#bebeae")
+                    "SPAM" -> Color.parseColor("#d6d6c8")
+                    else -> Color.parseColor("#9a9a90")
+                }
+            }
+            "sky_ocean" -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#67c7ff")
+                    "TRACKER" -> Color.parseColor("#80d0ff")
+                    "ANALYTICS" -> Color.parseColor("#9adaff")
+                    "SOCIAL" -> Color.parseColor("#b3e3ff")
+                    "TELEMETRY" -> Color.parseColor("#cdecff")
+                    "MALWARE" -> Color.parseColor("#e6f6ff")
+                    "OTT" -> Color.parseColor("#50baff")
+                    "DOH" -> Color.parseColor("#73c8ff")
+                    "MINER" -> Color.parseColor("#8bccff")
+                    "SPAM" -> Color.parseColor("#a6dbff")
+                    else -> Color.parseColor("#c2e9ff")
+                }
+            }
+            else -> {
+                when(cat.uppercase()) {
+                    "AD" -> Color.parseColor("#FF3B30")
+                    "TRACKER" -> Color.parseColor("#FF9500")
+                    "ANALYTICS" -> Color.parseColor("#007AFF")
+                    "MALWARE" -> Color.parseColor("#AF52DE")
+                    "TELEMETRY" -> Color.parseColor("#30D5C8")
+                    "SOCIAL" -> Color.parseColor("#FF2D55")
+                    "OTT" -> Color.parseColor("#00C7BE")
+                    "DOH" -> Color.parseColor("#5856D6")
+                    "MINER" -> Color.parseColor("#8E8E93")
+                    "SPAM" -> Color.parseColor("#BF5AF2")
+                    else -> Color.parseColor("#34C759")
+                }
+            }
         }
     }
 
@@ -205,7 +301,19 @@ class ShieldWidgetProvider : AppWidgetProvider() {
 
         for (cat in categories) {
             val sweep = (cat.value.toFloat() / total) * 360f
-            paint.color = getColorForCategory(cat.key)
+            
+            // Draw subtle border to prevent dark colors from submerging
+            paint.strokeWidth = 30f
+            paint.color = Color.parseColor("#30FFFFFF")
+            if (sweep > gap) {
+                canvas.drawArc(rect, startAngle + gap / 2f, sweep - gap, false, paint)
+            } else if (sweep > 0) {
+                canvas.drawArc(rect, startAngle + sweep / 2f, 0.1f, false, paint)
+            }
+            
+            // Draw actual segment
+            paint.strokeWidth = 26f
+            paint.color = getColorForCategory(context, cat.key)
             
             if (sweep > gap) {
                 canvas.drawArc(rect, startAngle + gap / 2f, sweep - gap, false, paint)

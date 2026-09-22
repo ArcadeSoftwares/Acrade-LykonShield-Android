@@ -54,6 +54,7 @@ fun SettingsScreen(
     onExcludeAppsClick: () -> Unit,
     onDeveloperClick: () -> Unit,
     onFaqClick: () -> Unit,
+    onWidgetPaletteClick: () -> Unit,
     topPadding: androidx.compose.ui.unit.Dp,
     bottomPadding: androidx.compose.ui.unit.Dp,
     backdrop: Backdrop
@@ -126,6 +127,23 @@ fun SettingsScreen(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Text(text = currentThemeText, color = Color.Gray, fontSize = 16.sp)
+                                    Text(text = "〉", color = Color.Gray, fontSize = 14.sp)
+                                }
+                            }
+                            HorizontalDivider(color = Color.Gray.copy(alpha = 0.2f), modifier = Modifier.padding(horizontal = 16.dp))
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { onWidgetPaletteClick() }
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(text = "Widget Palette", color = contentColor, fontSize = 16.sp)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
                                     Text(text = "〉", color = Color.Gray, fontSize = 14.sp)
                                 }
                             }

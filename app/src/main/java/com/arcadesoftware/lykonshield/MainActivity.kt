@@ -397,9 +397,18 @@ class MainActivity : ComponentActivity() {
                                     onExcludeAppsClick = { navController.navigate("exclude_apps") },
                                     onDeveloperClick = { navController.navigate("developer") },
                                     onFaqClick = { navController.navigate("faq") },
+                                    onWidgetPaletteClick = { navController.navigate("widget_palette") },
                                     topPadding = 12.dp + statusBarPadding,
                                     bottomPadding = 88.dp + navBarPadding,
                                     backdrop = backgroundBackdrop
+                                )
+                            }
+                            composable("widget_palette") {
+                                WidgetPaletteScreen(
+                                    onBackClick = { navController.popBackStack() },
+                                    backdrop = backgroundBackdrop,
+                                    topPadding = 16.dp + statusBarPadding,
+                                    bottomPadding = 16.dp + navBarPadding
                                 )
                             }
                             composable("developer") {
