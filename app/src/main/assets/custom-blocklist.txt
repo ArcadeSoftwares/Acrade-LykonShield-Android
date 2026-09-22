@@ -194,3 +194,4 @@
 ||admob.com^
 ||googleadservices.com^
 ||pagead2.googlesyndication.com^
+||hesads.akamaized.net^
